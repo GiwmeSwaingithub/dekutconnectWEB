@@ -100,169 +100,21 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// -------------------------------------------------------------
-// IN-MEMORY CACHE & PERSISTENCE (Handles 1M Traffic without DB exhaustion)
-// -------------------------------------------------------------
+// In-memory posts cache (loaded from posts.json on disk)
+// On GitHub Pages: posts are read from Firestore directly by the browser.
+// This server is used for LOCAL DEVELOPMENT only — not deployed to GitHub Pages.
 let postsCache = [];
-
-const INITIAL_POSTS = [
-  {
-    id: "dekutconnect-daily-campus-vibes",
-    slug: "dekutconnect-daily-campus-vibes",
-    title: "DEKUTCONNECT: The Beating Pulse of Dedan Kimathi University Student Vibes",
-    excerpt: "Education • DAILY DOSE OF CAMPUS VIBES • Trending moments, student initiatives, campus juice & memes on the student-run DEKUT platform.",
-    category: "Campus & Tech",
-    author: {
-      name: "dekutconnect admin",
-      role: "Campus Community Lead",
-      avatar: CREST_IMAGE_URL,
-      profileUrl: "https://admin.dekut.site"
-    },
-    publishedAt: "2026-09-19T08:00:00Z",
-    readTime: "4 min read",
-    featuredImage: CREST_IMAGE_URL,
-    ogImage: CREST_IMAGE_URL,
-    tags: ["DEKUTCONNECT", "Campus Vibes", "Student Life", "Education", "Memes"],
-    likes: 542,
-    dislikes: 3,
-    content: `Welcome to **[dekutconnect](https://www.instagram.com/dekutconnect/#)** — the official, student-run digital stage of Dedan Kimathi University of Technology!
-
-DEKUTCONNECT is where university updates meet authentic student culture, creative talent, and campus discussions.
-
-## 𝐃𝐀𝐈𝐋𝐘 𝐃𝐎𝐒𝐄 𝐎𝐅 𝐂𝐀𝐌𝐏𝐔𝐒 𝐕𝐈𝐁𝐄𝐒
-
-> **"Trending • Gossip • Juice • Memes • Student-run DEKUT page"**  
-> Serving the Kimathi community with unfiltered campus moments, academic triumphs, and daily humor.
-
-[instagram https://www.instagram.com/dekutconnect/]
-
-### What We Cover Daily:
-- 🔥 **Trending Moments**: Breaking student initiatives, engineering projects, and club activities.
-- 💬 **Campus Juice & Gossip**: What's really happening across the hostels, mess halls, and resource centers.
-- 😂 **Original Memes**: Relatable student humor about exam weeks, engineering practicals, and university life in Nyeri.
-- 🎓 **Academic & Career Highlights**: Celebrating DeKUT innovators, hackathon winners, and startup founders.
-
-### Connect With The Admin
-DEKUTCONNECT is curated by the community admin. For official inquiries, student highlights, and partnership requests, visit the admin portal at **[admin.dekut.site](https://admin.dekut.site)**.
-
-Follow us on Instagram at **[@dekutconnect](https://www.instagram.com/dekutconnect/#)** and never miss a beat of campus life!`
-  },
-  {
-    id: "dekut-engineering-breakthrough",
-    slug: "dekut-engineering-breakthrough",
-    title: "DeKUT Engineers Unveil Solar-Powered Autonomous Campus Rover",
-    excerpt: "The Mechatronics & Electrical Engineering department at Dedan Kimathi University of Technology introduces a homegrown AI rover built for agricultural precision mapping.",
-    category: "Innovation",
-    author: {
-      name: "dekutconnect admin",
-      role: "Senior Tech Correspondent",
-      avatar: CREST_IMAGE_URL,
-      profileUrl: "https://admin.dekut.site"
-    },
-    publishedAt: "2026-09-17T14:15:00Z",
-    readTime: "4 min read",
-    featuredImage: CREST_IMAGE_URL,
-    ogImage: CREST_IMAGE_URL,
-    tags: ["DeKUT", "Engineering", "AI", "Robotics"],
-    likes: 342,
-    dislikes: 6,
-    content: `A team of undergraduate engineering students and research fellows at Dedan Kimathi University of Technology (DeKUT) have completed field trials for an autonomous, solar-powered agricultural rover.
-
-Designed specifically to tackle soil health assessment in tea and coffee plantations around Mt. Kenya, the rover integrates multispectral imaging with real-time edge AI inference.
-
-[instagram https://www.instagram.com/dekutconnect/]
-
-## Precision Agriculture for Central Kenya
-
-> "Our goal was to make high-tech agronomy accessible to smallholder farmers," explains project lead Kelvin Kariuki. "Instead of sending soil samples to distant laboratories, our rover analyzes nitrogen, phosphorus, and moisture levels in seconds."
-
-### Key Technical Specifications
-- **Powertrain**: High-torque dual brushless DC motors powered by high-efficiency monocrystalline solar cells.
-- **Computer Vision**: Dual stereo camera array with depth sensing and weed recognition.
-- **Battery Life**: Up to 14 continuous hours in varied terrain.
-
-The project was demonstrated at the DeKUT Science and Technology Park, receiving praise from industry delegates.`
-  },
-  {
-    id: "dekut-tech-expo-2026",
-    slug: "dekut-tech-expo-2026",
-    title: "DeKUT Annual Tech Expo: Student Innovators Lead with Smart Grid & IoT Solutions",
-    excerpt: "Over forty student-led hardware and software projects took center stage at the DeKUT Science & Technology Park, showcasing practical engineering solutions for Kenya.",
-    category: "Campus & Tech",
-    author: {
-      name: "dekutconnect admin",
-      role: "Campus Community Lead",
-      avatar: CREST_IMAGE_URL,
-      profileUrl: "https://admin.dekut.site"
-    },
-    publishedAt: "2026-09-15T11:00:00Z",
-    readTime: "5 min read",
-    featuredImage: CREST_IMAGE_URL,
-    ogImage: CREST_IMAGE_URL,
-    tags: ["DeKUT", "TechExpo", "Innovation", "IoT", "Engineering"],
-    likes: 218,
-    dislikes: 2,
-    content: `Dedan Kimathi University of Technology has reaffirmed its standing as Kenya's premier technological and innovation hub during this year's annual DeKUT Tech Expo.
-
-From automated smart irrigation gateways to micro-hydro energy meters, students across Mechatronics, Electrical, and Telecommunication Engineering presented functional prototypes designed to solve everyday industrial and community problems.
-
-## Spotlighting Student Engineering
-
-Among the standout projects was an automated grain silo monitoring system that uses ultrasonic sensors to detect spoilage and moisture changes in real time.
-
-> "Engineering at DeKUT is about building tangible tools that work right out of the workshop," noted one of the lead project developers.
-
-Industry evaluators praised the university's focus on practical prototyping and urged student founders to explore commercial scaling.`
-  },
-  {
-    id: "student-guide-nyeri-campus-life",
-    slug: "student-guide-nyeri-campus-life",
-    title: "Life on the Slopes of Mt. Kenya: The Essential Student Guide to Thriving at DeKUT",
-    excerpt: "From finding the best study spots in the library to navigating chilly morning lectures and discovering weekend trails in Nyeri, here is how to make the most of your campus journey.",
-    category: "Life & Culture",
-    author: {
-      name: "dekutconnect admin",
-      role: "Campus Community Lead",
-      avatar: CREST_IMAGE_URL,
-      profileUrl: "https://admin.dekut.site"
-    },
-    publishedAt: "2026-09-12T09:30:00Z",
-    readTime: "4 min read",
-    featuredImage: CREST_IMAGE_URL,
-    ogImage: CREST_IMAGE_URL,
-    tags: ["Campus Life", "Nyeri", "Students", "DeKUT", "Guide"],
-    likes: 412,
-    dislikes: 5,
-    content: `Dedan Kimathi University of Technology sits in one of the most scenic environments in Kenya — nestled in the lush coffee-growing hills of Nyeri with Mt. Kenya towering in the distance.
-
-Whether you are a freshman stepping onto main campus for the first time or a continuing engineering scholar, mastering the DeKUT rhythm makes all the difference.
-
-## 1. Conquer the Nyeri Weather
-Nyeri mornings are crisp and misty. A solid university hoodie is non-negotiable for that 7:00 AM engineering practical. By midday, the sun warms the campus plazas, making outdoor study benches popular gathering spots.
-
-## 2. Resource Center & Library Hacks
-The DeKUT library is one of the quietest and best-equipped research centers in the region. Pro-tip: the upper floor corner desks near the west windows offer the best lighting and fast campus Wi-Fi access.
-
-## 3. Join a Community & Stay Connected
-Beyond classes, DeKUT hosts thriving clubs — from Google Developer Student Clubs (GDSC) and IEEE to the Drama and Mountaineering clubs. Connect with your peers, share moments on DEKUTCONNECT, and make your campus years unforgettable!`
-  }
-];
 
 function loadPosts() {
   try {
     if (fs.existsSync(POSTS_FILE)) {
       const raw = fs.readFileSync(POSTS_FILE, 'utf8');
-      postsCache = JSON.parse(raw);
-      if (!Array.isArray(postsCache) || postsCache.length === 0) {
-        postsCache = INITIAL_POSTS;
-        savePosts();
-      }
-    } else {
-      postsCache = INITIAL_POSTS;
-      savePosts();
+      const parsed = JSON.parse(raw);
+      postsCache = Array.isArray(parsed) && parsed.length > 0 ? parsed : [];
     }
   } catch (err) {
-    postsCache = INITIAL_POSTS;
+    console.error('Error loading posts.json:', err.message);
+    postsCache = [];
   }
 }
 
@@ -270,7 +122,7 @@ function savePosts() {
   try {
     fs.writeFileSync(POSTS_FILE, JSON.stringify(postsCache, null, 2));
   } catch (err) {
-    console.error('Error saving posts to disk:', err);
+    console.error('Error saving posts to disk:', err.message);
   }
 }
 

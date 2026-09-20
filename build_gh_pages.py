@@ -51,6 +51,20 @@ def build():
     
     # Ensure blog directory exists
     os.makedirs(BLOG_DIR, exist_ok=True)
+
+    # Clean up old post HTML files and post folders in blog/
+    core_files = {'index.html', 'editor.html', 'dmca.html', 'legal-audit.html', 'post.html', '404.html', 'manifest.json', 'posts.json'}
+    core_dirs = {'css', 'js', 'fonts', 'images', 'assets'}
+    for item in os.listdir(BLOG_DIR):
+        item_path = os.path.join(BLOG_DIR, item)
+        if os.path.isfile(item_path):
+            if item.endswith('.html') and item not in core_files:
+                os.remove(item_path)
+                print(f"Removed old post file: blog/{item}")
+        elif os.path.isdir(item_path):
+            if item not in core_dirs:
+                shutil.rmtree(item_path)
+                print(f"Removed old post directory: blog/{item}")
     
     # Copy public folders (css, js, fonts, images, assets) to blog/
     for sub in ['css', 'js', 'fonts', 'images', 'assets']:

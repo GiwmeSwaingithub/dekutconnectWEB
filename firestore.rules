@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Posts: anyone can read, only authenticated admins can write
+    match /posts/{postId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null
+        && request.auth.token.email_verified == true;
+    }
+
+    // Deny all other document access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

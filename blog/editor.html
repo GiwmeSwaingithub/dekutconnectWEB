@@ -9,6 +9,11 @@
   <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
   <link rel="apple-touch-icon" href="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
 
+  <!-- Firebase SDK (loaded before firebase-config.js) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
   <!-- 100% Self-Hosted Stylesheets (Zero Google Fonts CDN Calls) -->
   <link rel="stylesheet" href="/blog/css/style.css">
   <link rel="stylesheet" href="/blog/css/uiverse-upload.css">
@@ -128,7 +133,7 @@
 </head>
 <body>
 
-  <!-- Admin Authentication Modal (Only Admins Can Post) -->
+  <!-- Admin Authentication Modal (Only Firebase Authenticated Admins Can Post) -->
   <div id="admin-auth-modal" class="admin-auth-overlay">
     <div class="admin-auth-card">
       <img 
@@ -137,62 +142,45 @@
         alt="DEKUTCONNECT"
       />
       <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 0.35rem; color: #0f172a;">
-        Admin Authentication
+        Admin Sign In
       </h2>
       <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem;">
-        Only registered <strong>DEKUTCONNECT admins</strong> can write, edit, or publish articles to the digital journal.
+        Only registered <strong>DEKUTCONNECT admins</strong> can write and publish articles to the digital journal.
       </p>
+
+      <div id="auth-error-msg" style="display:none; background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; border-radius:6px; padding:0.6rem 0.85rem; font-size:0.85rem; margin-bottom:1rem; text-align:left;"></div>
 
       <form id="admin-login-form" style="text-align: left;">
         <div class="form-group">
           <label class="form-label" for="admin-email">Admin Email *</label>
-          <input type="text" id="admin-email" class="form-control" value="admin@dekut.admin.site" placeholder="admin@dekut.admin.site" autocomplete="username" />
+          <input type="email" id="admin-email" class="form-control" placeholder="Enter your admin email" autocomplete="off" spellcheck="false" />
         </div>
         <div class="form-group">
-          <label class="form-label" for="admin-password">Admin Password *</label>
+          <label class="form-label" for="admin-password">Password *</label>
           <input type="password" id="admin-password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
         </div>
-        <button type="button" id="btn-submit-login" class="btn-new-post" style="width: 100%; justify-content: center; padding: 0.75rem; font-size: 0.95rem; cursor: pointer;">
+        <button type="submit" id="btn-submit-login" class="btn-new-post" style="width: 100%; justify-content: center; padding: 0.75rem; font-size: 0.95rem; cursor: pointer;">
           Sign In as Admin
         </button>
       </form>
 
       <div style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 0.85rem;">
-        <button type="button" id="btn-quick-login" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600; color: #0f172a; cursor: pointer; width: 100%; margin-bottom: 0.75rem;">
-          ⚡ Instant Sign In with admin@dekut.admin.site
-        </button>
-        <a href="#" id="btn-passwordless" style="color: #b91c1c; font-weight: 600;">Sign In with Passwordless Email Link</a><br>
-        <a href="/blog" style="color: #64748b; display: inline-block; margin-top: 0.5rem;">← Return to Front Page</a>
+        <a href="/blog" style="color: #64748b; display: inline-block;">← Return to Front Page</a>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════
-       INLINE ADMIN AUTH — runs before any external JS.
-       Immune to legal-compliance.js masking.
+       REAL FIREBASE AUTHENTICATION GATE
+       Only users authenticated via Firebase Auth can see the editor.
+       Wrong passwords stay on the login screen — no bypass possible.
        ═══════════════════════════════════════════════════════ -->
+  <script src="/blog/js/cache-manager.js"></script>
+  <script src="/blog/js/firebase-config.js"></script>
   <script>
     (function () {
-      var ADMIN_KEY = 'dekut_admin_session';
-
-      function isLoggedIn() {
-        try {
-          var s = JSON.parse(localStorage.getItem(ADMIN_KEY));
-          return !!(s && s.email && s.token);
-        } catch (e) { return false; }
-      }
-
-      function doLogin(email, pass) {
-        email = (email || '').trim();
-        pass  = (pass  || '').trim();
-        if (!email || !pass) { alert('Please enter both your admin email and password.'); return; }
-        var token = 'dk_admin_' + Date.now().toString(36) + Math.random().toString(36).slice(2);
-        var session = { email: email.toLowerCase(), name: 'dekutconnect admin', role: 'Administrator', token: token, signedInAt: new Date().toISOString() };
-        localStorage.setItem(ADMIN_KEY, JSON.stringify(session));
-        hideModal();
-        var bar = document.getElementById('admin-active-email');
-        if (bar) bar.textContent = session.email;
-      }
+      // Show the auth modal immediately (hidden by JS once auth confirms)
+      document.getElementById('admin-auth-modal').style.display = 'flex';
 
       function hideModal() {
         var m = document.getElementById('admin-auth-modal');
@@ -204,36 +192,74 @@
         if (m) { m.style.display = 'flex'; m.classList.remove('hidden'); }
       }
 
-      function getEmail() { var el = document.getElementById('admin-email'); return el ? el.value.trim() : ''; }
-      function getPass()  { var el = document.getElementById('admin-password'); return el ? el.value.trim() : ''; }
+      function setAdminBar(user) {
+        var bar = document.getElementById('admin-active-email');
+        if (bar) bar.textContent = (user && user.email) ? user.email : 'dekutconnect admin';
+      }
+
+      // Wait for Firebase Auth to determine state
+      window.DKAuth.onAuthReady(function(user) {
+        if (user) {
+          hideModal();
+          setAdminBar(user);
+        } else {
+          showModal();
+        }
+      });
 
       window.addEventListener('DOMContentLoaded', function () {
-        /* If already logged in, hide the modal immediately */
-        if (isLoggedIn()) { hideModal(); return; }
-
-        /* Wire buttons */
-        var submitBtn = document.getElementById('btn-submit-login');
-        var quickBtn  = document.getElementById('btn-quick-login');
         var loginForm = document.getElementById('admin-login-form');
+        var submitBtn = document.getElementById('btn-submit-login');
         var logoutBtn = document.getElementById('btn-admin-logout');
-        var pwlessBtn = document.getElementById('btn-passwordless');
+        var errorEl  = document.getElementById('auth-error-msg');
 
-        if (submitBtn) submitBtn.addEventListener('click', function (e) { e.preventDefault(); doLogin(getEmail(), getPass()); });
-        if (quickBtn)  quickBtn.addEventListener('click',  function (e) { e.preventDefault(); doLogin(getEmail() || 'admin@dekut.admin.site', getPass()); });
-        if (loginForm) loginForm.addEventListener('submit', function (e) { e.preventDefault(); e.stopPropagation(); doLogin(getEmail(), getPass()); });
-        if (logoutBtn) logoutBtn.addEventListener('click',  function ()  { localStorage.removeItem(ADMIN_KEY); showModal(); });
-        if (pwlessBtn) pwlessBtn.addEventListener('click',  function (e) { e.preventDefault(); var em = prompt('Enter your admin email:'); if (em) alert('Passwordless link sent to ' + em + '. Check your inbox.'); });
-
-        /* Expose DKAuth to admin-editor.js if it hasn't loaded yet */
-        if (!window.DKAuth) {
-          window.DKAuth = {
-            isAdminLoggedIn: isLoggedIn,
-            getCurrentAdmin: function () { try { return JSON.parse(localStorage.getItem(ADMIN_KEY)); } catch(e){ return null; } },
-            getAuthToken: function () { var a = this.getCurrentAdmin(); return a ? a.token : 'guest'; },
-            signInAdmin: function (e, p) { doLogin(e, p); return Promise.resolve(this.getCurrentAdmin()); },
-            signOut: function () { localStorage.removeItem(ADMIN_KEY); showModal(); }
-          };
+        function showError(msg) {
+          if (errorEl) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
         }
+        function clearError() {
+          if (errorEl) { errorEl.textContent = ''; errorEl.style.display = 'none'; }
+        }
+        function setLoading(loading) {
+          if (submitBtn) {
+            submitBtn.disabled = loading;
+            submitBtn.textContent = loading ? 'Signing in…' : 'Sign In as Admin';
+          }
+        }
+
+        async function doLogin() {
+          clearError();
+          var emailEl = document.getElementById('admin-email');
+          var passEl  = document.getElementById('admin-password');
+          var email   = emailEl ? emailEl.value.trim() : '';
+          var pass    = passEl  ? passEl.value.trim() : '';
+
+          if (!email || !pass) {
+            showError('Please enter both your admin email and password.');
+            return;
+          }
+
+          setLoading(true);
+          try {
+            var admin = await window.DKAuth.signInAdmin(email, pass);
+            setAdminBar(admin);
+            if (passEl) passEl.value = '';
+            clearError();
+            hideModal();
+          } catch (err) {
+            showError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        if (submitBtn) submitBtn.addEventListener('click', function(e) { e.preventDefault(); doLogin(); });
+        if (loginForm) loginForm.addEventListener('submit', function(e) { e.preventDefault(); doLogin(); });
+        if (logoutBtn) logoutBtn.addEventListener('click', function() {
+          window.DKAuth.signOut();
+          showModal();
+          var bar = document.getElementById('admin-active-email');
+          if (bar) bar.textContent = 'Not signed in';
+        });
       });
     })();
   </script>
@@ -456,9 +482,7 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="/blog/js/cache-manager.js"></script>
-  <script src="/blog/js/firebase-config.js"></script>
+  <!-- admin-editor.js (cache-manager & firebase-config already loaded above) -->
   <script src="/blog/js/legal-compliance.js"></script>
   <script src="/blog/js/admin-editor.js"></script>
 </body>
