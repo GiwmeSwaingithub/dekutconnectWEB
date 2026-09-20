@@ -28,10 +28,25 @@
   <meta name="twitter:description" content="Explore stories, engineering breakthroughs, and student culture from Dedan Kimathi University of Technology.">
   <meta name="twitter:image" content="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
 
-  <!-- 100% Self-Hosted Stylesheets (Zero Google Fonts CDN Calls) -->
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/uiverse-social.css">
-  <link rel="stylesheet" href="/css/uiverse-loader.css">
+  <!-- Preconnect to external image host for faster load -->
+  <link rel="preconnect" href="https://i.postimg.cc" crossorigin>
+
+  <!-- Preload Critical CSS (Self-Hosted, Zero Google Fonts CDN Calls) -->
+  <link rel="preload" as="style" href="/blog/css/style.css">
+  <link rel="preload" as="style" href="/blog/css/uiverse-social.css">
+  <link rel="preload" as="style" href="/blog/css/uiverse-loader.css">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/blog/css/style.css">
+  <link rel="stylesheet" href="/blog/css/uiverse-social.css">
+  <link rel="stylesheet" href="/blog/css/uiverse-loader.css">
+
+  <!-- Preload Critical JS (improves load timing, non-blocking) -->
+  <link rel="preload" as="script" href="/blog/js/cache-manager.js">
+  <link rel="preload" as="script" href="/blog/js/firebase-config.js">
+  <link rel="preload" as="script" href="/blog/js/legal-compliance.js">
+  <link rel="preload" as="script" href="/blog/js/instagram-embed.js">
+  <link rel="preload" as="script" href="/blog/js/blog-engine.js">
 </head>
 <body>
 
@@ -63,14 +78,14 @@
         <span>• Nyeri, Kenya</span>
       </div>
       <div class="top-actions">
-        <a href="/legal-audit.html" class="legal-badge-link">
+        <a href="/blog/legal-audit.html" class="legal-badge-link">
           <span style="display:inline-block; width:8px; height:8px; background:#16a34a; border-radius:50%;"></span>
           Legal Audit Passed
         </a>
         <a href="https://admin.dekut.site" target="_blank" class="legal-badge-link" style="color: #0f172a;">
           Admin Portal
         </a>
-        <a href="/editor.html" class="btn-new-post">
+        <a href="/blog/editor.html" class="btn-new-post">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           New Article
         </a>
@@ -285,15 +300,15 @@
             <li><a href="/blog?category=Life+%26+Culture">Life & Culture</a></li>
             <li><a href="/blog?category=Innovation">Innovation & Research</a></li>
             <li><a href="https://admin.dekut.site" target="_blank">Admin Profile (admin.dekut.site)</a></li>
-            <li><a href="/editor.html">Author Submissions</a></li>
+            <li><a href="/blog/editor.html">Author Submissions</a></li>
           </ul>
         </div>
 
         <div class="footer-col">
           <h4>Legal & Compliance</h4>
           <ul>
-            <li><a href="/dmca.html">DMCA Designated Agent Notice</a></li>
-            <li><a href="/legal-audit.html">Legal Exposure Audit Report</a></li>
+            <li><a href="/blog/dmca.html">DMCA Designated Agent Notice</a></li>
+            <li><a href="/blog/legal-audit.html">Legal Exposure Audit Report</a></li>
             <li><a href="#coppa" onclick="window.LegalSuite.requestAgeVerification(); return false;">COPPA Verification Status</a></li>
             <li><a href="https://connect.dekut.site/unsubscribe">1-Click Unsubscribe (CAN-SPAM)</a></li>
           </ul>
@@ -316,11 +331,11 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script src="/js/cache-manager.js"></script>
-  <script src="/js/firebase-config.js"></script>
-  <script src="/js/legal-compliance.js"></script>
-  <script src="/js/instagram-embed.js"></script>
-  <script src="/js/blog-engine.js"></script>
+  <!-- Scripts (all under /blog/js/) -->
+  <script src="/blog/js/cache-manager.js"></script>
+  <script src="/blog/js/firebase-config.js"></script>
+  <script src="/blog/js/legal-compliance.js"></script>
+  <script src="/blog/js/instagram-embed.js"></script>
+  <script src="/blog/js/blog-engine.js"></script>
 </body>
 </html>
