@@ -11,6 +11,8 @@
  * - Postimages API upload integration (Key: 689f06e10e45d51bd422bd78b383e079)
  */
 
+require('dotenv').config();
+
 const express = require('express');
 const compression = require('compression');
 const fs = require('fs');
@@ -25,13 +27,14 @@ const POSTS_FILE = path.join(__dirname, 'posts.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // -------------------------------------------------------------
-// CLOUDFLARE R2 OBJECT STORAGE CONFIGURATION
+// CLOUDFLARE R2 & POSTIMAGES STORAGE CONFIGURATION (.env)
 // -------------------------------------------------------------
-const R2_ACCOUNT_ID = '21d4f442dcf1f5c9c5aa1e798a2bdabe';
+const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '21d4f442dcf1f5c9c5aa1e798a2bdabe';
 const R2_ENDPOINT = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
-const R2_ACCESS_KEY_ID = '2fca3fa7ade68ab159d07477ba4cdbe4';
-const R2_SECRET_ACCESS_KEY = 'aca8073b58cd9c9fc218911a75d673238fb072ebb8971339877dbf7a8244a1fc';
-const R2_BUCKET = 'axtra';
+const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '2fca3fa7ade68ab159d07477ba4cdbe4';
+const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || 'aca8073b58cd9c9fc218911a75d673238fb072ebb8971339877dbf7a8244a1fc';
+const R2_BUCKET = process.env.R2_BUCKET || 'axtra';
+const POSTIMAGES_API_KEY = process.env.POSTIMAGES_API_KEY || '689f06e10e45d51bd422bd78b383e079';
 
 const r2Client = new S3Client({
   region: 'auto',
@@ -321,7 +324,72 @@ app.get(['/api/media/*', '/blog/api/media/*'], async (req, res) => {
   }
 });
 
-// Cloudflare R2 Upload Endpoint (Supports base64 or binary uploads for Videos & Images)
+// Helper function: upload image buffer to Postimages Cloud API
+function uploadToPostimages(buffer, fileName) {
+  return new Promise((resolve, reject) => {
+    const postData = querystring.stringify({
+      token: POSTIMAGES_API_KEY,
+      upload: buffer.toString('base64'),
+      filename: fileName || `image_${Date.now()}.jpg`
+    });
+
+    const options = {
+      hostname: 'postimages.org',
+      port: 443,
+      path: '/api/upload',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData)
+      },
+      timeout: 8000
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => body += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          if (parsed && parsed.url) {
+            resolve(parsed.url);
+          } else if (parsed && parsed.direct_link) {
+            resolve(parsed.direct_link);
+          } else {
+            reject(new Error(parsed.error || 'Postimages API returned invalid format'));
+          }
+        } catch (e) {
+          reject(new Error('Failed to parse Postimages response'));
+        }
+      });
+    });
+
+    req.on('error', (err) => reject(err));
+    req.on('timeout', () => { req.destroy(); reject(new Error('Postimages upload timed out')); });
+    req.write(postData);
+    req.end();
+  });
+}
+
+// Helper function: upload buffer to Cloudflare R2
+async function uploadToR2(buffer, cleanName, contentType, isVideo) {
+  const folder = isVideo || contentType.startsWith('video/') ? 'videos' : 'images';
+  const key = `${folder}/${Date.now()}_${cleanName}`;
+
+  await r2Client.send(new PutObjectCommand({
+    Bucket: R2_BUCKET,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType,
+  }));
+
+  const r2Url = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET}/${key}`;
+  const proxyUrl = `/api/media/${key}`;
+
+  return { key, r2Url, proxyUrl };
+}
+
+// Unified Media Upload Endpoint (Images: Postimages -> R2 -> Local | Videos: R2 -> Local)
 app.post(['/api/upload-video', '/api/upload-media', '/api/upload-image', '/blog/api/upload-video', '/blog/api/upload-media', '/blog/api/upload-image'], async (req, res) => {
   const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
   const now = Date.now();
@@ -337,59 +405,100 @@ app.post(['/api/upload-video', '/api/upload-media', '/api/upload-image', '/blog/
     }
   }
 
-  const { fileData, fileName, mimeType, isVideo } = req.body || {};
+  const { fileData, image, name, fileName, mimeType, isVideo: reqIsVideo } = req.body || {};
+  const rawData = fileData || image;
 
-  if (!fileData) {
-    return res.status(400).json({ error: 'No file data provided' });
+  if (!rawData) {
+    return res.status(400).json({ error: 'No media file data provided' });
   }
 
   try {
-    // Extract base64 buffer
     let buffer;
-    let contentType = mimeType || (isVideo ? 'video/mp4' : 'image/jpeg');
+    let contentType = mimeType || 'image/jpeg';
 
-    if (fileData.startsWith('data:')) {
-      const parts = fileData.split(',');
+    if (rawData.startsWith('data:')) {
+      const parts = rawData.split(',');
       const matches = parts[0].match(/data:(.*?);base64/);
       if (matches) contentType = matches[1];
       buffer = Buffer.from(parts[1], 'base64');
     } else {
-      buffer = Buffer.from(fileData, 'base64');
+      buffer = Buffer.from(rawData, 'base64');
     }
 
-    const cleanName = (fileName || `media_${now}`).toLowerCase().replace(/[^\w\.\-]+/g, '_');
-    const folder = isVideo || contentType.startsWith('video/') ? 'videos' : 'images';
-    const key = `${folder}/${Date.now()}_${cleanName}`;
+    const isVideo = Boolean(reqIsVideo || contentType.startsWith('video/') || /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(fileName || name || ''));
+    const cleanName = (fileName || name || `media_${now}`).toLowerCase().replace(/[^\w\.\-]+/g, '_');
 
-    // Upload to Cloudflare R2 Bucket
-    await r2Client.send(new PutObjectCommand({
-      Bucket: R2_BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-    }));
+    // ─── 1. IMAGES FLOW: Postimages -> R2 -> Local Disk ────────────────────
+    if (!isVideo) {
+      try {
+        console.log(`[IMAGE UPLOAD] Attempting Postimages API upload for: ${cleanName}`);
+        const postimagesUrl = await uploadToPostimages(buffer, cleanName);
+        console.log(`[IMAGE UPLOAD SUCCESS: Postimages] ${postimagesUrl}`);
+        return res.json({
+          success: true,
+          url: postimagesUrl,
+          provider: 'postimages',
+          isVideo: false
+        });
+      } catch (postimagesErr) {
+        console.warn(`[IMAGE UPLOAD FALLBACK: Postimages failed -> trying Cloudflare R2]:`, postimagesErr.message);
+      }
 
-    const r2Url = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET}/${key}`;
-    const proxyUrl = `/api/media/${key}`;
+      // Fallback to Cloudflare R2 for Images
+      try {
+        const { key, r2Url, proxyUrl } = await uploadToR2(buffer, cleanName, contentType, false);
+        console.log(`[IMAGE UPLOAD SUCCESS: Cloudflare R2] ${key}`);
+        return res.json({
+          success: true,
+          url: proxyUrl,
+          r2Url: r2Url,
+          key: key,
+          provider: 'cloudflare-r2',
+          isVideo: false
+        });
+      } catch (r2Err) {
+        console.warn(`[IMAGE UPLOAD FALLBACK: R2 failed -> trying Local disk]:`, r2Err.message);
+      }
+    }
 
-    // Also save to local uploads directory as fallback
+    // ─── 2. VIDEOS FLOW: Cloudflare R2 -> Local Disk ───────────────────────
+    if (isVideo) {
+      try {
+        console.log(`[VIDEO UPLOAD] Attempting Cloudflare R2 upload for: ${cleanName}`);
+        const { key, r2Url, proxyUrl } = await uploadToR2(buffer, cleanName, contentType, true);
+        console.log(`[VIDEO UPLOAD SUCCESS: Cloudflare R2] ${key}`);
+        return res.json({
+          success: true,
+          url: proxyUrl,
+          r2Url: r2Url,
+          key: key,
+          provider: 'cloudflare-r2',
+          isVideo: true
+        });
+      } catch (r2Err) {
+        console.warn(`[VIDEO UPLOAD FALLBACK: R2 failed -> trying Local disk]:`, r2Err.message);
+      }
+    }
+
+    // ─── 3. FINAL LOCAL DISK FALLBACK (If Cloud APIs fail) ─────────────────
     const uploadsDir = path.join(PUBLIC_DIR, 'assets', 'uploads');
     os_mkdir(uploadsDir);
-    const localFilePath = path.join(uploadsDir, `${Date.now()}_${cleanName}`);
+    const localFileName = `${now}_${cleanName}`;
+    const localFilePath = path.join(uploadsDir, localFileName);
     fs.writeFileSync(localFilePath, buffer);
+    const localUrl = `/assets/uploads/${localFileName}`;
 
-    console.log(`[CLOUDFLARE R2] Media uploaded successfully: ${key}`);
+    console.log(`[MEDIA UPLOAD LOCAL FALLBACK] Saved to: ${localUrl}`);
     return res.json({
       success: true,
-      url: proxyUrl,
-      r2Url: r2Url,
-      key: key,
-      mimeType: contentType,
-      isVideo: isVideo || contentType.startsWith('video/')
+      url: localUrl,
+      provider: 'local-disk',
+      isVideo: isVideo
     });
+
   } catch (err) {
-    console.error('[CLOUDFLARE R2 UPLOAD ERROR]', err);
-    return res.status(500).json({ error: `Upload to Cloudflare R2 failed: ${err.message}` });
+    console.error('[MEDIA UPLOAD ERROR]', err);
+    return res.status(500).json({ error: `Media processing failed: ${err.message}` });
   }
 });
 
@@ -607,12 +716,16 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(` DEKUTCONNECT Post Server Running on port ${PORT}`);
-  console.log(` DDoS Protection Active (Rate Limiter + Security Headers)`);
-  console.log(` Admin-Protected Publishing Enabled`);
-  console.log(` Front Page: http://localhost:${PORT}/blog`);
-  console.log(` Write Post: http://localhost:${PORT}/editor.html`);
-  console.log(`====================================================`);
-});
+if (process.env.NODE_ENV !== 'production' || require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(` DEKUTCONNECT Post Server Running on port ${PORT}`);
+    console.log(` DDoS Protection Active (Rate Limiter + Security Headers)`);
+    console.log(` Admin-Protected Publishing Enabled`);
+    console.log(` Front Page: http://localhost:${PORT}/blog`);
+    console.log(` Write Post: http://localhost:${PORT}/editor.html`);
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = app;

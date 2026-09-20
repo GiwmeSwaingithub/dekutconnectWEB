@@ -8,10 +8,9 @@
       var path = window.location.pathname;
       var parts = path.split('/').filter(Boolean);
       
-      // If path is under /blog/<slug>
       if (parts.length >= 1) {
         var slug = parts[parts.length - 1].replace(/\.html$/, '');
-        if (slug && slug !== 'blog' && slug !== 'index') {
+        if (slug && slug !== 'blog' && slug !== 'index' && slug !== 'editor' && slug !== 'dmca') {
           window.location.replace('/blog/post.html?slug=' + encodeURIComponent(slug));
           return;
         }

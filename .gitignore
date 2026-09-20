@@ -2,3 +2,8 @@ node_modules/
 *.log
 last_user_input.txt
 fix_post.py
+.env
+.env.local
+.env.*.local
+
+.vercel
