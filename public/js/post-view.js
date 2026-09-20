@@ -23,13 +23,12 @@ function resolveMediaUrl(url) {
   return url;
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initPostView() {
   const loaderOverlay = document.getElementById('loader-overlay');
-
-  // Immediately hide loader after max 800ms under any circumstances
-  const maxLoaderTimeout = setTimeout(() => {
-    if (loaderOverlay) loaderOverlay.classList.add('hidden');
-  }, 800);
+  if (loaderOverlay) {
+    loaderOverlay.classList.add('hidden');
+    loaderOverlay.style.display = 'none';
+  }
 
   const params = new URLSearchParams(window.location.search);
   let slug = params.get('slug');
@@ -52,12 +51,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Error loading article:', err);
     showError('Error Loading Article', err.message);
   } finally {
-    clearTimeout(maxLoaderTimeout);
     if (loaderOverlay) {
       loaderOverlay.classList.add('hidden');
+      loaderOverlay.style.display = 'none';
     }
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPostView);
+} else {
+  initPostView();
+}
 
 function renderPost(post) {
   document.title = `${post.title} — DEKUTCONNECT Post`;

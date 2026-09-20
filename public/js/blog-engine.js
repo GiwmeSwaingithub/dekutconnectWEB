@@ -23,11 +23,12 @@ function resolveMediaUrl(url) {
   return url;
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initBlogIndex() {
   const loaderOverlay = document.getElementById('loader-overlay');
-  const maxLoaderTimeout = setTimeout(() => {
-    if (loaderOverlay) loaderOverlay.classList.add('hidden');
-  }, 800);
+  if (loaderOverlay) {
+    loaderOverlay.classList.add('hidden');
+    loaderOverlay.style.display = 'none';
+  }
 
   try {
     const posts = await window.DKDB.getAllPosts();
@@ -35,9 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     console.error('Error initializing blog index:', err);
   } finally {
-    clearTimeout(maxLoaderTimeout);
     if (loaderOverlay) {
       loaderOverlay.classList.add('hidden');
+      loaderOverlay.style.display = 'none';
     }
   }
 
@@ -46,7 +47,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupNewsletter();
   updateCurrentDate();
   fetchRealWeatherForUser();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initBlogIndex);
+} else {
+  initBlogIndex();
+}
 
 // Update human-readable newspaper date
 function updateCurrentDate() {

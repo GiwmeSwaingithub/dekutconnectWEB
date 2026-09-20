@@ -169,9 +169,19 @@ class DatabaseService {
     if (!slug) return null;
     const cleanSlug = slug.trim().toLowerCase();
 
-    // Check in-memory cache first
+    // 1. Check in-memory cache first
     const cached = window.DKCache?.get?.(`post_${cleanSlug}`);
     if (cached) return cached;
+
+    // 2. Check localStorage cache (instant, 0ms)
+    const localPosts = this._readCache();
+    if (localPosts && Array.isArray(localPosts)) {
+      const localMatch = localPosts.find(p => p.slug === cleanSlug || (p.aliases && p.aliases.includes(cleanSlug)) || (cleanSlug.includes('parents') && (p.slug.includes('parents') || p.title?.toLowerCase().includes('parents'))));
+      if (localMatch) {
+        window.DKCache?.set?.(`post_${cleanSlug}`, localMatch);
+        return localMatch;
+      }
+    }
 
     const firebase = getFirebase();
     if (firebase) {
@@ -181,7 +191,7 @@ class DatabaseService {
           .limit(1)
           .get();
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Firestore timeout')), 2500)
+          setTimeout(() => reject(new Error('Firestore timeout')), 1200)
         );
 
         const snap = await Promise.race([snapPromise, timeoutPromise]);
