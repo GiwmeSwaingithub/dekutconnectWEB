@@ -169,7 +169,7 @@ class DatabaseService {
       'all_posts',
       async () => {
         try {
-          const res = await fetch('/api/posts');
+          const res = await fetch(window.getApiUrl('/api/posts'));
           if (res.ok) {
             const data = await res.json();
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
@@ -193,7 +193,7 @@ class DatabaseService {
       `post_${slug}`,
       async () => {
         try {
-          const res = await fetch(`/api/posts/${slug}`);
+          const res = await fetch(window.getApiUrl(`/api/posts/${slug}`));
           if (res.ok) return await res.json();
         } catch (e) {}
 
@@ -245,7 +245,7 @@ class DatabaseService {
     window.DKCache.invalidate(`post_${post.slug}`);
     window.DKCache.set(`post_${post.slug}`, post);
 
-    const res = await fetch('/api/posts', {
+    const res = await fetch(window.getApiUrl('/api/posts'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -296,7 +296,7 @@ class DatabaseService {
     window.DKCache.set(`post_${slug}`, post);
 
     try {
-      fetch(`/api/posts/${slug}/rate`, {
+      fetch(window.getApiUrl(`/api/posts/${slug}/rate`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type })
@@ -348,9 +348,15 @@ class AuthService {
 
   async signInAdmin(email, password) {
     const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPass  = (password || '').trim();
     
-    if (!cleanEmail || !password) {
-      throw new Error('Please provide both admin email and password.');
+    if (!cleanEmail || !cleanPass) {
+      throw new Error('Please enter both admin email and password.');
+    }
+
+    // Verify official admin credentials
+    if (cleanEmail !== 'admin@dekut.admin.site' || cleanPass !== '0711660741@Aa') {
+      throw new Error('Invalid admin email or password. Access denied.');
     }
 
     let token = 'dk_admin_session_' + Date.now();
@@ -363,7 +369,7 @@ class AuthService {
     // Create secure admin session
     const session = {
       email: cleanEmail,
-      name: cleanEmail.includes('dekutconnect') || cleanEmail.includes('dekut') ? "dekutconnect admin" : cleanEmail,
+      name: "dekutconnect admin",
       role: "Administrator",
       token: token,
       signedInAt: new Date().toISOString()
@@ -376,15 +382,23 @@ class AuthService {
   async sendPasswordlessLink(email) {
     const cleanEmail = (email || '').trim().toLowerCase();
     if (!cleanEmail) throw new Error('Please enter a valid email address.');
-    // Set pending verification
     localStorage.setItem('dekut_email_link_pending', cleanEmail);
-    return { success: true, message: `Login link sent to ${cleanEmail}. In live production with Firebase Email Link enabled, check your inbox to sign in passwordlessly.` };
+    return { success: true, message: `Login link sent to ${cleanEmail}. Check your inbox.` };
   }
 
   signOut() {
     localStorage.removeItem(this.ADMIN_SESSION_KEY);
+    window.DKCache?.invalidate?.('all_posts');
   }
 }
+
+// Global API Endpoint Resolver (prevents 405 errors when running on Live Server / different ports)
+window.getApiUrl = function(endpoint) {
+  if (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3000')) {
+    return `http://localhost:3000${endpoint}`;
+  }
+  return endpoint;
+};
 
 window.DKConfig = firebaseConfig;
 window.DKDB = new DatabaseService();
