@@ -83,13 +83,43 @@ function renderPost(post) {
   const readTimeEl = document.getElementById('read-time');
   if (readTimeEl) readTimeEl.textContent = post.readTime || '4 min read';
 
-  // Featured Media
+  // Featured Media (Photo or Video Feature)
   const heroMediaEl = document.getElementById('article-hero-media');
-  if (heroMediaEl && post.featuredImage) {
-    heroMediaEl.innerHTML = `
-      <img src="${post.featuredImage}" alt="${escapeHtml(post.title)}" />
-      <div class="article-caption">Photo / Media feature — DEKUTCONNECT Post Digital Edition</div>
-    `;
+  if (heroMediaEl) {
+    const isVideo = post.mediaType === 'video' || !!post.videoUrl || (post.featuredImage && (post.featuredImage.endsWith('.mp4') || post.featuredImage.endsWith('.webm')));
+    const videoSrc = post.videoUrl || post.featuredImage;
+
+    if (isVideo && videoSrc) {
+      if (videoSrc.includes('youtube.com') || videoSrc.includes('youtu.be')) {
+        let ytId = '';
+        if (videoSrc.includes('youtu.be/')) ytId = videoSrc.split('youtu.be/')[1].split('?')[0];
+        else if (videoSrc.includes('v=')) ytId = videoSrc.split('v=')[1].split('&')[0];
+        else if (videoSrc.includes('embed/')) ytId = videoSrc.split('embed/')[1].split('?')[0];
+        const embedUrl = ytId ? `https://www.youtube.com/embed/${ytId}?autoplay=0` : videoSrc;
+
+        heroMediaEl.innerHTML = `
+          <div class="article-hero-video-container">
+            <iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div class="article-caption">Video feature — DEKUTCONNECT Post Digital Edition</div>
+        `;
+      } else {
+        heroMediaEl.innerHTML = `
+          <div class="article-hero-video-container">
+            <video controls playsinline poster="${post.featuredImage || ''}">
+              <source src="${videoSrc}" type="video/mp4">
+              Your browser does not support HTML5 video playback.
+            </video>
+          </div>
+          <div class="article-caption">Video feature — DEKUTCONNECT Post Digital Edition</div>
+        `;
+      }
+    } else if (post.featuredImage) {
+      heroMediaEl.innerHTML = `
+        <img src="${post.featuredImage}" alt="${escapeHtml(post.title)}" />
+        <div class="article-caption">Photo / Media feature — DEKUTCONNECT Post Digital Edition</div>
+      `;
+    }
   }
 
   // Article Body
@@ -239,12 +269,14 @@ function parseSimpleMarkdown(text) {
     .replace(/\*(.*?)\*/gim, '<em>$1</em>')
     .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
     .replace(/^\- (.*$)/gim, '<li>$1</li>')
+    .replace(/\!\[video\]\((.*?)\)/gim, '<div class="article-hero-video-container" style="margin: 1.5rem 0;"><video controls playsinline src="$1"></video></div>')
+    .replace(/\!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" style="width:100%; border-radius:6px; margin: 1.25rem 0;" />')
     .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" style="color: #b91c1c; text-decoration: underline;">$1</a>')
     .split(/\n\n+/)
     .map(p => {
       p = p.trim();
       if (!p) return '';
-      if (p.startsWith('<h') || p.startsWith('<blockquote') || p.startsWith('<div') || p.startsWith('<li>') || p.startsWith('<a')) {
+      if (p.startsWith('<h') || p.startsWith('<blockquote') || p.startsWith('<div') || p.startsWith('<li>') || p.startsWith('<a') || p.startsWith('<img')) {
         return p;
       }
       return `<p>${p.replace(/\n/g, '<br>')}</p>`;

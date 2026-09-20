@@ -138,12 +138,21 @@ function renderBlogIndex(posts) {
   const featuredContainer = document.getElementById('featured-story-container');
   if (featuredContainer && featured) {
     const authorProfile = featured.author?.profileUrl || 'https://admin.dekut.site';
+    const isVideo = featured.mediaType === 'video' || !!featured.videoUrl;
     featuredContainer.innerHTML = `
       <article class="featured-story">
         <a href="/blog/${featured.slug}">
           <div class="featured-img-wrap">
             <span class="category-pill">${escapeHtml(featured.category)}</span>
             <img src="${featured.featuredImage}" alt="${escapeHtml(featured.title)}" loading="eager" />
+            ${isVideo ? `
+              <div class="video-play-overlay">
+                <div class="video-play-badge">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                </div>
+              </div>
+              <span class="video-type-tag">VIDEO</span>
+            ` : ''}
           </div>
         </a>
         <div class="featured-content">
@@ -165,7 +174,7 @@ function renderBlogIndex(posts) {
             </div>
             <div style="text-align: right;">
               <div>${new Date(featured.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">${featured.readTime || '4 min read'}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${featured.readTime || '4 MIN READ'}</div>
             </div>
           </div>
         </div>
@@ -173,21 +182,35 @@ function renderBlogIndex(posts) {
     `;
   }
 
-  // 3. Sub-Stories Grid
-  const remaining = posts.slice(1);
+  // 3. Section 1: In Case You Missed It Carousel (Image 1 Layout)
+  renderInCaseYouMissedIt(posts);
+
+  // 4. Section 2: More to Read For Free Grid (Image 2 Layout)
+  renderMoreToRead(posts);
+
+  // 5. Sub-Stories Grid (Remaining dispatches)
+  const remaining = posts.slice(7);
   const subStoriesContainer = document.getElementById('sub-stories-grid');
   if (subStoriesContainer) {
     if (remaining.length === 0) {
-      subStoriesContainer.innerHTML = '';
+      subStoriesContainer.innerHTML = '<p style="color: #64748b; font-size: 0.9rem; grid-column: 1/-1;">Explore all stories in the sections above.</p>';
       return;
     }
 
     subStoriesContainer.innerHTML = remaining.map(p => {
       const authorProfile = p.author?.profileUrl || 'https://admin.dekut.site';
+      const isVideo = p.mediaType === 'video' || !!p.videoUrl;
       return `
         <article class="story-card" data-category="${p.category}" data-title="${escapeHtml(p.title.toLowerCase())}">
-          <a href="/blog/${p.slug}">
+          <a href="/blog/${p.slug}" style="position: relative; display: block;">
             <img class="story-card-img" src="${p.featuredImage}" alt="${escapeHtml(p.title)}" loading="lazy" />
+            ${isVideo ? `
+              <div class="video-play-overlay">
+                <div class="video-play-badge">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                </div>
+              </div>
+            ` : ''}
           </a>
           <div class="story-card-body">
             <span class="category-pill" style="position:static; align-self:flex-start; margin-bottom: 0.5rem;">${escapeHtml(p.category)}</span>
@@ -204,13 +227,90 @@ function renderBlogIndex(posts) {
                   <span>${escapeHtml(p.author?.name || 'dekutconnect admin')}</span>
                 </a>
               </div>
-              <span>${p.readTime || '3 min'}</span>
+              <span>${p.readTime || '3 MIN READ'}</span>
             </div>
           </div>
         </article>
       `;
     }).join('');
   }
+}
+
+// Render "In Case You Missed It" 3-column carousel section
+function renderInCaseYouMissedIt(posts) {
+  const container = document.getElementById('missed-it-carousel');
+  const nextBtn = document.getElementById('missed-it-next-btn');
+  if (!container) return;
+
+  // Use articles 1 to 4 for carousel
+  const missedPosts = posts.slice(1, 5);
+  if (missedPosts.length === 0) return;
+
+  container.innerHTML = missedPosts.map(p => {
+    const isVideo = p.mediaType === 'video' || !!p.videoUrl;
+    const metaText = p.sourceTag || p.readTime || '4 MIN READ';
+    return `
+      <a class="missed-card" href="/blog/${p.slug}">
+        <div class="missed-card-media">
+          <img src="${p.featuredImage}" alt="${escapeHtml(p.title)}" loading="lazy" />
+          ${isVideo ? `
+            <div class="video-play-overlay">
+              <div class="video-play-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+        <h4 class="missed-card-title">${escapeHtml(p.title)}</h4>
+        <div class="missed-card-meta">${escapeHtml(metaText)}</div>
+      </a>
+    `;
+  }).join('');
+
+  if (nextBtn) {
+    nextBtn.onclick = () => {
+      const scrollAmount = container.clientWidth * 0.75;
+      if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+        container.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    };
+  }
+}
+
+// Render "More to read for free" 2-column grid section
+function renderMoreToRead(posts) {
+  const container = document.getElementById('more-to-read-grid');
+  if (!container) return;
+
+  // Use articles 5 to 9 for grid
+  const morePosts = posts.slice(4, 8);
+  if (morePosts.length === 0) return;
+
+  container.innerHTML = morePosts.map(p => {
+    const isVideo = p.mediaType === 'video' || !!p.videoUrl;
+    const categoryTag = p.sourceTag || (p.category ? p.category.toUpperCase() : '');
+    return `
+      <a class="more-card" href="/blog/${p.slug}">
+        <div class="more-card-content">
+          ${categoryTag ? `<span class="more-card-category">${escapeHtml(categoryTag)}</span>` : ''}
+          <h4 class="more-card-title">${escapeHtml(p.title)}</h4>
+          <div class="more-card-meta">${escapeHtml(p.readTime || '3 MIN READ')}</div>
+        </div>
+        <div class="more-card-thumb">
+          <img src="${p.featuredImage}" alt="${escapeHtml(p.title)}" loading="lazy" />
+          ${isVideo ? `
+            <div class="video-play-overlay">
+              <div class="video-play-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </a>
+    `;
+  }).join('');
 }
 
 function setupCategoryFilters() {

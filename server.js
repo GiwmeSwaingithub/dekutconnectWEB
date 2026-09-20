@@ -17,11 +17,30 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const querystring = require('querystring');
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const POSTS_FILE = path.join(__dirname, 'posts.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
+
+// -------------------------------------------------------------
+// CLOUDFLARE R2 OBJECT STORAGE CONFIGURATION
+// -------------------------------------------------------------
+const R2_ACCOUNT_ID = '21d4f442dcf1f5c9c5aa1e798a2bdabe';
+const R2_ENDPOINT = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
+const R2_ACCESS_KEY_ID = '2fca3fa7ade68ab159d07477ba4cdbe4';
+const R2_SECRET_ACCESS_KEY = 'aca8073b58cd9c9fc218911a75d673238fb072ebb8971339877dbf7a8244a1fc';
+const R2_BUCKET = 'axtra';
+
+const r2Client = new S3Client({
+  region: 'auto',
+  endpoint: R2_ENDPOINT,
+  credentials: {
+    accessKeyId: R2_ACCESS_KEY_ID,
+    secretAccessKey: R2_SECRET_ACCESS_KEY,
+  },
+});
 
 const CREST_IMAGE_URL = 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg';
 const AVATAR_PLACEHOLDER = '/images/avatar-placeholder.svg';
@@ -275,6 +294,110 @@ app.get(['/dmca', '/dmca.html', '/blog/dmca', '/blog/dmca.html'], (req, res) => 
 app.get(['/legal-audit', '/legal-audit.html', '/blog/legal-audit'], (req, res) => {
   res.redirect(301, '/blog');
 });
+
+// -------------------------------------------------------------
+// CLOUDFLARE R2 MEDIA UPLOAD & PROXY ENDPOINTS
+// -------------------------------------------------------------
+// Streaming endpoint to access R2 bucket objects seamlessly
+app.get(['/api/media/*', '/blog/api/media/*'], async (req, res) => {
+  try {
+    const objectKey = req.params[0];
+    if (!objectKey) return res.status(400).send('Missing media key');
+
+    const getCmd = new GetObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: objectKey,
+    });
+
+    const r2Res = await r2Client.send(getCmd);
+    if (r2Res.ContentType) res.setHeader('Content-Type', r2Res.ContentType);
+    if (r2Res.ContentLength) res.setHeader('Content-Length', r2Res.ContentLength);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+
+    r2Res.Body.pipe(res);
+  } catch (err) {
+    console.error('R2 Media Proxy Error:', err.message);
+    res.status(404).send('Media object not found');
+  }
+});
+
+// Cloudflare R2 Upload Endpoint (Supports base64 or binary uploads for Videos & Images)
+app.post(['/api/upload-video', '/api/upload-media', '/api/upload-image', '/blog/api/upload-video', '/blog/api/upload-media', '/blog/api/upload-image'], async (req, res) => {
+  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+  const now = Date.now();
+
+  let uploadData = ipUploadCounts.get(clientIp);
+  if (!uploadData || (now - uploadData.startTime > 60000)) {
+    uploadData = { count: 1, startTime: now };
+    ipUploadCounts.set(clientIp, uploadData);
+  } else {
+    uploadData.count++;
+    if (uploadData.count > UPLOAD_RATE_LIMIT) {
+      return res.status(429).json({ error: 'Upload rate limit reached. Please wait a minute.' });
+    }
+  }
+
+  const { fileData, fileName, mimeType, isVideo } = req.body || {};
+
+  if (!fileData) {
+    return res.status(400).json({ error: 'No file data provided' });
+  }
+
+  try {
+    // Extract base64 buffer
+    let buffer;
+    let contentType = mimeType || (isVideo ? 'video/mp4' : 'image/jpeg');
+
+    if (fileData.startsWith('data:')) {
+      const parts = fileData.split(',');
+      const matches = parts[0].match(/data:(.*?);base64/);
+      if (matches) contentType = matches[1];
+      buffer = Buffer.from(parts[1], 'base64');
+    } else {
+      buffer = Buffer.from(fileData, 'base64');
+    }
+
+    const cleanName = (fileName || `media_${now}`).toLowerCase().replace(/[^\w\.\-]+/g, '_');
+    const folder = isVideo || contentType.startsWith('video/') ? 'videos' : 'images';
+    const key = `${folder}/${Date.now()}_${cleanName}`;
+
+    // Upload to Cloudflare R2 Bucket
+    await r2Client.send(new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    }));
+
+    const r2Url = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET}/${key}`;
+    const proxyUrl = `/api/media/${key}`;
+
+    // Also save to local uploads directory as fallback
+    const uploadsDir = path.join(PUBLIC_DIR, 'assets', 'uploads');
+    os_mkdir(uploadsDir);
+    const localFilePath = path.join(uploadsDir, `${Date.now()}_${cleanName}`);
+    fs.writeFileSync(localFilePath, buffer);
+
+    console.log(`[CLOUDFLARE R2] Media uploaded successfully: ${key}`);
+    return res.json({
+      success: true,
+      url: proxyUrl,
+      r2Url: r2Url,
+      key: key,
+      mimeType: contentType,
+      isVideo: isVideo || contentType.startsWith('video/')
+    });
+  } catch (err) {
+    console.error('[CLOUDFLARE R2 UPLOAD ERROR]', err);
+    return res.status(500).json({ error: `Upload to Cloudflare R2 failed: ${err.message}` });
+  }
+});
+
+function os_mkdir(dirPath) {
+  try {
+    if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+  } catch (e) {}
+}
 
 // -------------------------------------------------------------
 // REST API ENDPOINTS (Supports /api/* and /blog/api/*)

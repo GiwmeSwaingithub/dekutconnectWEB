@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const titleInput = document.getElementById('post-title');
   const slugInput = document.getElementById('post-slug');
   const excerptInput = document.getElementById('post-excerpt');
+  const mediaTypeSelect = document.getElementById('post-media-type');
+  const videoUrlInput = document.getElementById('post-video-url');
   const featuredImageInput = document.getElementById('post-featured-image');
   const ogImageInput = document.getElementById('post-og-image');
   const contentInput = document.getElementById('post-content');
@@ -35,6 +37,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       titleInput.value = post.title || '';
       slugInput.value = post.slug || '';
       excerptInput.value = post.excerpt || '';
+      if (mediaTypeSelect) mediaTypeSelect.value = post.mediaType || 'image';
+      if (videoUrlInput) videoUrlInput.value = post.videoUrl || '';
       featuredImageInput.value = post.featuredImage || '';
       ogImageInput.value = post.ogImage || '';
       contentInput.value = post.content || '';
@@ -87,6 +91,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let slug = slugInput.value.trim() || slugify(title);
     const excerpt = excerptInput.value.trim();
     const content = contentInput.value.trim();
+    const mediaType = mediaTypeSelect ? mediaTypeSelect.value : 'image';
+    const videoUrl = videoUrlInput ? videoUrlInput.value.trim() : '';
     const featuredImage = featuredImageInput.value.trim() || DEFAULT_EMBLEM_URL;
     const ogImage = ogImageInput.value.trim() || featuredImage;
     const category = categorySelect.value;
@@ -101,13 +107,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const wordCount = content.split(/\s+/).length;
-    const readTime = `${Math.max(1, Math.round(wordCount / 200))} min read`;
+    const readTime = `${Math.max(1, Math.round(wordCount / 200))} MIN READ`;
 
     const postData = {
       title,
       slug,
       excerpt: excerpt || title,
       category,
+      mediaType,
+      videoUrl,
       author: {
         name: authorName,
         role: authorRole,
@@ -256,43 +264,45 @@ function setupAdminAuthGate() {
 }
 
 // -------------------------------------------------------------
-// REUSABLE CLOUD / DATA-URL IMAGE UPLOADER
+// CLOUDFLARE R2 MEDIA UPLOADER (VIDEOS & IMAGES)
 // -------------------------------------------------------------
-async function uploadImageFile(file) {
-  if (!file || !file.type.startsWith('image/')) {
-    throw new Error('Please select a valid image file (JPG, PNG, GIF, WEBP).');
+async function uploadMediaFile(file, forceIsVideo = false) {
+  if (!file) {
+    throw new Error('Please select a valid file.');
   }
+
+  const isVideo = forceIsVideo || file.type.startsWith('video/') || /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(file.name);
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Failed to read image file.'));
+    reader.onerror = () => reject(new Error('Failed to read file.'));
     reader.onload = async () => {
       const base64Data = reader.result;
-      const ext = file.name.split('.').pop() || 'jpg';
 
       try {
-        const targetUrl = window.getApiUrl ? window.getApiUrl('/api/upload-image') : '/api/upload-image';
+        const endpoint = isVideo ? '/api/upload-video' : '/api/upload-image';
+        const targetUrl = window.getApiUrl ? window.getApiUrl(endpoint) : endpoint;
+        
         const res = await fetch(targetUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            image: base64Data,
-            name: file.name,
-            type: ext
+            fileData: base64Data,
+            fileName: file.name,
+            mimeType: file.type,
+            isVideo: isVideo
           })
         });
 
         const data = await res.json();
 
         if (res.ok && data.success && data.url) {
-          resolve(data.url);
+          resolve({ url: data.url, r2Url: data.r2Url, isVideo: data.isVideo || isVideo });
         } else {
-          // Fallback: use data URI if API returned error so user is never blocked
-          resolve(base64Data);
+          resolve({ url: base64Data, isVideo: isVideo });
         }
       } catch (err) {
-        // Fallback to local preview data URI
-        resolve(base64Data);
+        resolve({ url: base64Data, isVideo: isVideo });
       }
     };
     reader.readAsDataURL(file);
@@ -300,20 +310,22 @@ async function uploadImageFile(file) {
 }
 
 // -------------------------------------------------------------
-// UIVERSE.IO YAYA12085 CLOUD FILE UPLOADER (POSTIMAGES)
+// UIVERSE.IO MEDIA FILE UPLOADER (CLOUDFLARE R2 CLOUD BUCKET)
 // -------------------------------------------------------------
 function setupUiverseUploader() {
   const fileInput = document.getElementById('file');
   const uploadHeader = document.getElementById('uiverse-upload-header');
   const uploadContainer = document.getElementById('uiverse-upload-container');
   const fileStatusText = document.getElementById('file-status-text');
-  const instructionText = document.getElementById('upload-instruction-text');
-  const clearBtn = document.getElementById('btn-clear-selection');
   const feedbackEl = document.getElementById('upload-feedback');
   const featuredImageInput = document.getElementById('post-featured-image');
   const ogImageInput = document.getElementById('post-og-image');
+  const contentInput = document.getElementById('post-content');
 
   if (!fileInput || !uploadHeader) return;
+
+  // Set file accept attribute to allow both images AND video formats
+  fileInput.setAttribute('accept', 'image/*,video/*,.mp4,.webm,.mov,.mkv,.avi,.m4v,.webp,.png,.jpg,.jpeg');
 
   const defaultHeaderHtml = uploadHeader.innerHTML;
 
@@ -321,13 +333,22 @@ function setupUiverseUploader() {
     uploadHeader.innerHTML = defaultHeaderHtml;
   }
 
-  function renderPreview(imageUrl, filename) {
-    uploadHeader.innerHTML = `
-      <img class="upload-preview-img" src="${imageUrl}" alt="Preview" />
-      <p style="margin-top: 0.35rem; font-size: 0.8rem; color: #15803d; font-weight: 700;">
-        ✓ Selected: ${escapeHtml(filename)}
-      </p>
-    `;
+  function renderPreview(mediaUrl, filename, isVideo) {
+    if (isVideo) {
+      uploadHeader.innerHTML = `
+        <video class="upload-preview-img" style="max-height: 180px; width: 100%; border-radius: 6px; object-fit: cover;" controls src="${mediaUrl}"></video>
+        <p style="margin-top: 0.35rem; font-size: 0.8rem; color: #15803d; font-weight: 700;">
+          ✓ Selected Video: ${escapeHtml(filename)}
+        </p>
+      `;
+    } else {
+      uploadHeader.innerHTML = `
+        <img class="upload-preview-img" src="${mediaUrl}" alt="Preview" />
+        <p style="margin-top: 0.35rem; font-size: 0.8rem; color: #15803d; font-weight: 700;">
+          ✓ Selected Image: ${escapeHtml(filename)}
+        </p>
+      `;
+    }
   }
 
   function triggerPicker(e) {
@@ -348,38 +369,45 @@ function setupUiverseUploader() {
   fileInput.addEventListener('change', async (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      const isVideo = file.type.startsWith('video/') || /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(file.name);
       const localBlobUrl = URL.createObjectURL(file);
       
-      // Render instant local thumbnail preview
-      renderPreview(localBlobUrl, file.name);
+      renderPreview(localBlobUrl, file.name, isVideo);
 
       if (fileStatusText) fileStatusText.textContent = `Uploading ${file.name}...`;
-      if (feedbackEl) feedbackEl.innerHTML = `<span style="color: #b91c1c; font-size: 0.8rem; font-weight: 600;">⏳ Uploading to Postimages Cloud...</span>`;
+      if (feedbackEl) feedbackEl.innerHTML = `<span style="color: #b91c1c; font-size: 0.8rem; font-weight: 600;">⏳ Uploading media to Cloudflare R2 Bucket (axtra)...</span>`;
 
       try {
-        const uploadedUrl = await uploadImageFile(file);
+        const uploadResult = await uploadMediaFile(file, isVideo);
+        const uploadedUrl = uploadResult.url;
 
         if (fileStatusText) fileStatusText.textContent = file.name;
         
-        // Update thumbnail to final uploaded URL
-        renderPreview(uploadedUrl, file.name);
+        renderPreview(uploadedUrl, file.name, uploadResult.isVideo);
 
-        featuredImageInput.value = uploadedUrl;
-        ogImageInput.value = uploadedUrl;
+        if (!uploadResult.isVideo) {
+          if (featuredImageInput) featuredImageInput.value = uploadedUrl;
+          if (ogImageInput) ogImageInput.value = uploadedUrl;
+        } else {
+          // If video uploaded, append embedded video tag to article content
+          if (contentInput) {
+            const videoMarkdown = `\n\n<video controls playsinline style="width:100%; border-radius:8px; margin: 1rem 0;">\n  <source src="${uploadedUrl}" type="${file.type || 'video/mp4'}">\n</video>\n\n`;
+            contentInput.value = (contentInput.value || '') + videoMarkdown;
+          }
+        }
 
         if (feedbackEl) {
-          const isBase64 = uploadedUrl.startsWith('data:');
           feedbackEl.innerHTML = `
-            <div class="upload-success-badge" style="justify-content: center; margin-top: 0.5rem;">
-              <span>✓ Successfully uploaded! Direct link:</span>
-              <a href="${uploadedUrl}" target="_blank" style="color: #b91c1c; text-decoration: underline;">${isBase64 ? 'Local Image' : uploadedUrl}</a>
+            <div class="upload-success-badge" style="justify-content: center; margin-top: 0.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.5rem; border-radius: 6px;">
+              <span style="color: #15803d; font-weight: 700;">✓ Cloudflare R2 Uploaded! Media Link:</span>
+              <a href="${uploadedUrl}" target="_blank" style="color: #b91c1c; font-weight: 700; text-decoration: underline; margin-left: 0.35rem;">${uploadedUrl}</a>
             </div>
           `;
         }
 
         updateLiveSeoPreview();
       } catch (err) {
-        alert(err.message || 'Error processing image file.');
+        alert(err.message || 'Error processing media file.');
         if (fileStatusText) fileStatusText.textContent = 'Not selected file';
         resetHeader();
         if (feedbackEl) feedbackEl.innerHTML = '';
@@ -480,6 +508,14 @@ function setupEditorToolbar(textarea) {
   document.getElementById('btn-tool-bold')?.addEventListener('click', () => insertAtCursor('**', '**'));
   document.getElementById('btn-tool-italic')?.addEventListener('click', () => insertAtCursor('*', '*'));
   document.getElementById('btn-tool-quote')?.addEventListener('click', () => insertAtCursor('\n> '));
+
+  // Video Embed Prompt
+  document.getElementById('btn-tool-video')?.addEventListener('click', () => {
+    const url = prompt('Enter Video URL (MP4 direct link or YouTube URL):\n(e.g., https://commondatastorage.googleapis.com/.../sample.mp4 or YouTube link)');
+    if (url) {
+      insertAtCursor(`\n\n![video](${url.trim()})\n\n`);
+    }
+  });
 
   // Instagram Embed Prompt
   document.getElementById('btn-tool-instagram')?.addEventListener('click', () => {
