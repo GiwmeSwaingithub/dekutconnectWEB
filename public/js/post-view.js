@@ -7,67 +7,40 @@
 const CREST_IMAGE_URL = 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  setupReaderConsent();
+  const loaderOverlay = document.getElementById('loader-overlay');
+
+  // Immediately hide loader after max 1.5 seconds under any circumstances
+  const maxLoaderTimeout = setTimeout(() => {
+    if (loaderOverlay) loaderOverlay.classList.add('hidden');
+  }, 1500);
 
   const params = new URLSearchParams(window.location.search);
   let slug = params.get('slug');
   if (!slug) {
     const parts = window.location.pathname.split('/').filter(Boolean);
-    if (parts.length >= 2 && parts[0] === 'blog') {
-      slug = parts[1];
+    if (parts.length >= 2 && (parts[0] === 'blog' || parts[0] === 'dekutconnect')) {
+      slug = parts[parts.length - 1].replace(/\.html$/, '');
     }
-  }
-
-  const loaderOverlay = document.getElementById('loader-overlay');
-  
-  if (!slug) {
-    showError('Article Not Found', 'No article slug specified.');
-    if (loaderOverlay) loaderOverlay.classList.add('hidden');
-    return;
   }
 
   try {
-    const post = await window.DKDB.getPostBySlug(slug);
+    const post = await window.DKDB.getPostBySlug(slug || 'parents-portal-for-monitoring-students-academic-performance-and-more');
 
     if (!post) {
-      showError('Article Not Found', `The requested article "${slug}" does not exist.`);
-      if (loaderOverlay) loaderOverlay.classList.add('hidden');
-      return;
+      showError('Article Not Found', `The requested article "${slug || ''}" does not exist.`);
+    } else {
+      renderPost(post);
     }
-
-    renderPost(post);
   } catch (err) {
     console.error('Error loading article:', err);
     showError('Error Loading Article', err.message);
   } finally {
+    clearTimeout(maxLoaderTimeout);
     if (loaderOverlay) {
-      setTimeout(() => loaderOverlay.classList.add('hidden'), 250);
+      loaderOverlay.classList.add('hidden');
     }
   }
 });
-
-// Mandatory Reader Consent Gate (Before User Reads)
-function setupReaderConsent() {
-  const gate = document.getElementById('reader-consent-gate');
-  const agreeBtn = document.getElementById('btn-consent-agree');
-
-  if (!gate) return;
-
-  const hasConsented = localStorage.getItem('dekut_reader_consent') === 'true';
-  if (hasConsented) {
-    gate.classList.add('consented');
-  } else {
-    gate.classList.remove('consented');
-  }
-
-  if (agreeBtn) {
-    agreeBtn.addEventListener('click', () => {
-      localStorage.setItem('dekut_reader_consent', 'true');
-      localStorage.setItem('dekut_coppa_verified', 'true');
-      gate.classList.add('consented');
-    });
-  }
-}
 
 function renderPost(post) {
   document.title = `${post.title} — DEKUTCONNECT Post`;
