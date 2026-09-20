@@ -160,8 +160,8 @@ window.DKCache = new HighScaleCache();
       return;
     }
 
-    // If already completely loaded, skip shimmer
-    if (img.complete && img.naturalWidth > 0) {
+    // If already complete (loaded or errored), never apply shimmer
+    if (img.complete) {
       img.classList.remove('img-shimmer');
       img.classList.add('shimmer-loaded');
       return;
@@ -177,6 +177,8 @@ window.DKCache = new HighScaleCache();
 
     img.addEventListener('load', onComplete, { once: true });
     img.addEventListener('error', onComplete, { once: true });
+    // Safety valve: shimmer must never persist longer than 1.5 seconds
+    setTimeout(onComplete, 1500);
   }
 
   function scanImages() {

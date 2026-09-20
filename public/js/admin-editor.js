@@ -321,6 +321,7 @@ function setupUiverseUploader() {
   const featuredImageInput = document.getElementById('post-featured-image');
   const ogImageInput = document.getElementById('post-og-image');
   const contentInput = document.getElementById('post-content');
+  const clearBtn = document.getElementById('btn-clear-selection');
 
   if (!fileInput || !uploadHeader) return;
 
@@ -487,6 +488,11 @@ function updateLiveSeoPreview() {
       socialImg.src = DEFAULT_EMBLEM_URL;
     };
   }
+}
+
+async function uploadImageFile(file) {
+  const result = await uploadMediaFile(file, false);
+  return result?.url || DEFAULT_EMBLEM_URL;
 }
 
 // Editor Toolbar

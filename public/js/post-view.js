@@ -6,13 +6,30 @@
 
 const CREST_IMAGE_URL = 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg';
 
+function resolveMediaUrl(url) {
+  if (!url) return CREST_IMAGE_URL;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+  if (url.startsWith('/api/media/')) {
+    if (window.location.hostname === 'connect.dekut.site') {
+      return 'https://dekutconnect.vercel.app' + url;
+    }
+    return url;
+  }
+  if (url.startsWith('/assets/')) {
+    if (window.location.hostname === 'connect.dekut.site') {
+      return '/blog' + url;
+    }
+  }
+  return url;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const loaderOverlay = document.getElementById('loader-overlay');
 
-  // Immediately hide loader after max 1.5 seconds under any circumstances
+  // Immediately hide loader after max 800ms under any circumstances
   const maxLoaderTimeout = setTimeout(() => {
     if (loaderOverlay) loaderOverlay.classList.add('hidden');
-  }, 1500);
+  }, 800);
 
   const params = new URLSearchParams(window.location.search);
   let slug = params.get('slug');
@@ -87,7 +104,9 @@ function renderPost(post) {
   const heroMediaEl = document.getElementById('article-hero-media');
   if (heroMediaEl) {
     const isVideo = post.mediaType === 'video' || !!post.videoUrl || (post.featuredImage && (post.featuredImage.endsWith('.mp4') || post.featuredImage.endsWith('.webm')));
-    const videoSrc = post.videoUrl || post.featuredImage;
+    const rawVideoSrc = post.videoUrl || post.featuredImage;
+    const videoSrc = resolveMediaUrl(rawVideoSrc);
+    const resolvedHeroImg = resolveMediaUrl(post.featuredImage);
 
     if (isVideo && videoSrc) {
       if (videoSrc.includes('youtube.com') || videoSrc.includes('youtu.be')) {
@@ -106,7 +125,7 @@ function renderPost(post) {
       } else {
         heroMediaEl.innerHTML = `
           <div class="article-hero-video-container">
-            <video controls playsinline poster="${post.featuredImage || ''}">
+            <video controls playsinline poster="${resolvedHeroImg || ''}">
               <source src="${videoSrc}" type="video/mp4">
               Your browser does not support HTML5 video playback.
             </video>
@@ -116,7 +135,7 @@ function renderPost(post) {
       }
     } else if (post.featuredImage) {
       heroMediaEl.innerHTML = `
-        <img src="${post.featuredImage}" alt="${escapeHtml(post.title)}" />
+        <img src="${resolvedHeroImg}" alt="${escapeHtml(post.title)}" onerror="this.onerror=null;this.src='${CREST_IMAGE_URL}'" />
         <div class="article-caption">Photo / Media feature — DEKUTCONNECT Post Digital Edition</div>
       `;
     }
@@ -125,10 +144,10 @@ function renderPost(post) {
   // Article Body
   const bodyEl = document.getElementById('article-body');
   if (bodyEl) {
-    let parsedContent = window.IGEmbed.processContent(post.content);
+    let parsedContent = window.IGEmbed ? window.IGEmbed.processContent(post.content) : (post.content || '');
     parsedContent = parseSimpleMarkdown(parsedContent);
     bodyEl.innerHTML = parsedContent;
-    window.IGEmbed.loadScript();
+    window.IGEmbed?.loadScript?.();
   }
 
   // Tags
@@ -337,7 +356,7 @@ async function loadRelatedStories(currentPost) {
 }
 
 function showError(title, msg) {
-  const container = document.querySelector('.container');
+  const container = document.querySelector('main') || document.querySelector('.container');
   if (container) {
     container.innerHTML = `
       <div style="text-align: center; padding: 4rem 1rem;">

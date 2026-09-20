@@ -4,11 +4,30 @@
  * real geolocation weather API, and high-scale cached rendering.
  */
 
+const CREST_IMAGE_URL = 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg';
+
+function resolveMediaUrl(url) {
+  if (!url) return CREST_IMAGE_URL;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+  if (url.startsWith('/api/media/')) {
+    if (window.location.hostname === 'connect.dekut.site') {
+      return 'https://dekutconnect.vercel.app' + url;
+    }
+    return url;
+  }
+  if (url.startsWith('/assets/')) {
+    if (window.location.hostname === 'connect.dekut.site') {
+      return '/blog' + url;
+    }
+  }
+  return url;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const loaderOverlay = document.getElementById('loader-overlay');
   const maxLoaderTimeout = setTimeout(() => {
     if (loaderOverlay) loaderOverlay.classList.add('hidden');
-  }, 1000);
+  }, 800);
 
   try {
     const posts = await window.DKDB.getAllPosts();
@@ -144,7 +163,7 @@ function renderBlogIndex(posts) {
         <a href="/blog/${featured.slug}">
           <div class="featured-img-wrap">
             <span class="category-pill">${escapeHtml(featured.category)}</span>
-            <img src="${featured.featuredImage}" alt="${escapeHtml(featured.title)}" loading="eager" />
+            <img src="${resolveMediaUrl(featured.featuredImage)}" alt="${escapeHtml(featured.title)}" onerror="this.onerror=null;this.src='${CREST_IMAGE_URL}'" loading="eager" />
             ${isVideo ? `
               <div class="video-play-overlay">
                 <div class="video-play-badge">
@@ -203,7 +222,7 @@ function renderBlogIndex(posts) {
       return `
         <article class="story-card" data-category="${p.category}" data-title="${escapeHtml(p.title.toLowerCase())}">
           <a href="/blog/${p.slug}" style="position: relative; display: block;">
-            <img class="story-card-img" src="${p.featuredImage}" alt="${escapeHtml(p.title)}" loading="lazy" />
+            <img class="story-card-img" src="${resolveMediaUrl(p.featuredImage)}" alt="${escapeHtml(p.title)}" onerror="this.onerror=null;this.src='${CREST_IMAGE_URL}'" loading="lazy" />
             ${isVideo ? `
               <div class="video-play-overlay">
                 <div class="video-play-badge">
@@ -221,7 +240,7 @@ function renderBlogIndex(posts) {
             <div class="post-meta-row">
               <div class="author-info">
                 <a href="${authorProfile}" target="_blank">
-                  <img class="author-avatar" style="width: 24px; height: 24px; border: 1px solid #cbd5e1;" src="${p.author?.avatar || 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg'}" alt="" />
+                  <img class="author-avatar" style="width: 24px; height: 24px; border: 1px solid #cbd5e1;" src="${p.author?.avatar || CREST_IMAGE_URL}" alt="" onerror="this.onerror=null;this.src='${CREST_IMAGE_URL}'" />
                 </a>
                 <a href="${authorProfile}" target="_blank" style="color: inherit;">
                   <span>${escapeHtml(p.author?.name || 'dekutconnect admin')}</span>
@@ -252,7 +271,7 @@ function renderInCaseYouMissedIt(posts) {
     return `
       <a class="missed-card" href="/blog/${p.slug}">
         <div class="missed-card-media">
-          <img src="${p.featuredImage}" alt="${escapeHtml(p.title)}" loading="lazy" />
+          <img src="${resolveMediaUrl(p.featuredImage)}" alt="${escapeHtml(p.title)}" onerror="this.onerror=null;this.src='${CREST_IMAGE_URL}'" loading="lazy" />
           ${isVideo ? `
             <div class="video-play-overlay">
               <div class="video-play-badge">
@@ -299,7 +318,7 @@ function renderMoreToRead(posts) {
           <div class="more-card-meta">${escapeHtml(p.readTime || '3 MIN READ')}</div>
         </div>
         <div class="more-card-thumb">
-          <img src="${p.featuredImage}" alt="${escapeHtml(p.title)}" loading="lazy" />
+          <img src="${resolveMediaUrl(p.featuredImage)}" alt="${escapeHtml(p.title)}" onerror="this.onerror=null;this.src='${CREST_IMAGE_URL}'" loading="lazy" />
           ${isVideo ? `
             <div class="video-play-overlay">
               <div class="video-play-badge">

@@ -55,13 +55,17 @@ function getFirebase() {
 // On GitHub Pages, all API calls go to the Express server running on localhost:3000
 // (used for admin publishing only — readers always use Firestore directly).
 window.getApiUrl = function(endpoint) {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     const port = window.location.port || '3000';
-    return `http://localhost:${port}${endpoint}`;
+    return `http://localhost:${port}${cleanEndpoint}`;
   }
-  // On production GitHub Pages, admin operations hit the deployed server.
-  // For reads, Firestore is used directly — no API calls needed for readers.
-  return endpoint;
+  // On Vercel domain itself, use relative path
+  if (window.location.hostname.includes('vercel.app')) {
+    return cleanEndpoint;
+  }
+  // On GitHub Pages or custom domain (connect.dekut.site), route all API calls to Vercel production backend
+  return `https://dekutconnect.vercel.app${cleanEndpoint}`;
 };
 
 // ─── Database Service ─────────────────────────────────────────────────────────
