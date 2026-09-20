@@ -78,10 +78,20 @@ async function initPostView() {
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPostView);
-} else {
+let _postViewInitialized = false;
+function safeInitPostView() {
+  if (_postViewInitialized) return;
+  _postViewInitialized = true;
   initPostView();
+}
+
+window.initPostView = initPostView;
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  safeInitPostView();
+} else {
+  document.addEventListener('DOMContentLoaded', safeInitPostView);
+  window.addEventListener('load', safeInitPostView);
 }
 
 function renderPost(post) {

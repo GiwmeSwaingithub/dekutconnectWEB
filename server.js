@@ -24,6 +24,7 @@ const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/clien
 const app = express();
 const PORT = process.env.PORT || 3000;
 const POSTS_FILE = path.join(__dirname, 'posts.json');
+const PUBLIC_POSTS_FILE = path.join(__dirname, 'public', 'posts.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // -------------------------------------------------------------
@@ -150,7 +151,9 @@ function loadPosts() {
 
 function savePosts() {
   try {
-    fs.writeFileSync(POSTS_FILE, JSON.stringify(postsCache, null, 2));
+    const data = JSON.stringify(postsCache, null, 2);
+    fs.writeFileSync(POSTS_FILE, data);
+    fs.writeFileSync(PUBLIC_POSTS_FILE, data);
   } catch (err) {
     console.error('Error saving posts to disk:', err.message);
   }
@@ -779,7 +782,7 @@ app.post(['/api/posts', '/blog/api/posts'], (req, res) => {
     title: escapeHtml(post.title).trim(),
     slug: String(post.slug || '').toLowerCase().replace(/[^\w\-]+/g, '').trim(),
     excerpt: escapeHtml(post.excerpt).trim(),
-    category: escapeHtml(post.category || 'Campus & Tech').trim(),
+    category: String(post.category || 'Campus & Tech').trim(),
     author: {
       name: escapeHtml(post.author?.name || 'dekutconnect admin').trim(),
       role: escapeHtml(post.author?.role || 'Campus Community Lead').trim(),

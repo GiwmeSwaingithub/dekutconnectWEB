@@ -159,12 +159,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const saved = await window.DKDB.savePost(postData);
       const targetSlug = saved?.slug || slug;
       
-      // Instant redirect to new article (works on GitHub Pages & Vercel)
-      if (window.location.hostname === 'connect.dekut.site') {
-        window.location.href = `/blog/post.html?slug=${encodeURIComponent(targetSlug)}`;
-      } else {
-        window.location.href = `/blog/${targetSlug}`;
-      }
+      // Instant clean URL redirect to new article (works on GitHub Pages & Vercel)
+      window.location.href = `/blog/${targetSlug}`;
     } catch (err) {
       alert(`Publishing failed: ${err.message}`);
       if (submitBtn) {
