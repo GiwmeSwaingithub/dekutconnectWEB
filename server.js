@@ -413,6 +413,118 @@ function os_mkdir(dirPath) {
 }
 
 // -------------------------------------------------------------
+// SOCIAL FOLLOWER & SUBSCRIBER STATS ENGINE (10-min server cache)
+// -------------------------------------------------------------
+const YT_API_KEY = process.env.YT_API_KEY || "AIzaSyDzpoppFO0ONZ9EL3ZKwbqK_qzTFj54lAY";
+const YT_CHANNEL_ID = process.env.YT_CHANNEL_ID || "UC_nCdtD-j7nDD1rMsf3LK-w";
+const IG_USERNAME = "dekutconnect";
+
+let socialStatsCache = {
+  data: {
+    instagram: { raw: 7833, formatted: "7.8K" },
+    youtube: { raw: 3, formatted: "3" },
+    updatedAt: new Date().toISOString()
+  },
+  expiresAt: 0,
+  isRefreshing: false
+};
+
+function formatSocialCount(numStr) {
+  if (!numStr) return '0';
+  const cleanStr = String(numStr).replace(/,/g, '');
+  const num = parseInt(cleanStr, 10);
+  if (isNaN(num)) return String(numStr);
+  if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return num.toString();
+}
+
+async function fetchYouTubeSubscribers() {
+  try {
+    const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${YT_CHANNEL_ID}&key=${YT_API_KEY}`;
+    const data = await new Promise((resolve) => {
+      https.get(url, { timeout: 3000 }, (res) => {
+        let b = '';
+        res.on('data', d => b += d);
+        res.on('end', () => {
+          try { resolve(JSON.parse(b)); } catch(e) { resolve(null); }
+        });
+      }).on('error', () => resolve(null));
+    });
+    const subCount = data?.items?.[0]?.statistics?.subscriberCount;
+    if (subCount !== undefined) {
+      return { raw: parseInt(subCount, 10), formatted: formatSocialCount(subCount) };
+    }
+  } catch(e) {}
+  return socialStatsCache.data.youtube;
+}
+
+async function fetchInstagramFollowers() {
+  try {
+    const url = `https://www.instagram.com/${IG_USERNAME}/`;
+    const html = await new Promise((resolve) => {
+      const u = new URL(url);
+      https.get({
+        hostname: u.hostname,
+        path: u.pathname,
+        headers: {
+          'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        },
+        timeout: 4000
+      }, (res) => {
+        let b = '';
+        res.on('data', d => b += d);
+        res.on('end', () => resolve(b));
+      }).on('error', () => resolve(''));
+    });
+    const matchDesc = html.match(/meta property="og:description" content="([^"]+)"/i);
+    if (matchDesc) {
+      const matchFollowers = matchDesc[1].match(/([\d,\.]+[KkMm]?)\s*Followers/i);
+      if (matchFollowers) {
+        const rawStr = matchFollowers[1].replace(/,/g, '');
+        return { raw: rawStr, formatted: formatSocialCount(rawStr) };
+      }
+    }
+  } catch(e) {}
+  return socialStatsCache.data.instagram;
+}
+
+async function refreshSocialStats() {
+  if (socialStatsCache.isRefreshing) return;
+  socialStatsCache.isRefreshing = true;
+  try {
+    const [yt, ig] = await Promise.all([
+      fetchYouTubeSubscribers(),
+      fetchInstagramFollowers()
+    ]);
+    socialStatsCache.data = {
+      instagram: ig,
+      youtube: yt,
+      updatedAt: new Date().toISOString()
+    };
+    socialStatsCache.expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes cache
+  } catch(e) {
+  } finally {
+    socialStatsCache.isRefreshing = false;
+  }
+}
+
+app.get(['/api/social-stats', '/blog/api/social-stats'], async (req, res) => {
+  const now = Date.now();
+  
+  if (now >= socialStatsCache.expiresAt) {
+    if (socialStatsCache.expiresAt === 0) {
+      await refreshSocialStats();
+    } else {
+      refreshSocialStats();
+    }
+  }
+
+  res.json(socialStatsCache.data);
+});
+
+// -------------------------------------------------------------
 // REST API ENDPOINTS (Supports /api/* and /blog/api/*)
 // -------------------------------------------------------------
 app.get(['/api/posts', '/blog/api/posts'], async (req, res) => {
@@ -560,7 +672,8 @@ function parseSimpleMarkdownServer(text) {
 function renderPostHtml(post, templateHtml) {
   let html = templateHtml;
   const canonicalUrl = `https://connect.dekut.site/blog/${post.slug}`;
-  const ogImg = post.ogImage || post.featuredImage || CREST_IMAGE_URL;
+  const rawOgImg = post.ogImage || post.featuredImage || CREST_IMAGE_URL;
+  const ogImg = resolveServerMediaUrl(rawOgImg);
   const escapedTitle = escapeHtml(post.title);
   const escapedDesc = escapeHtml(post.excerpt);
 
@@ -573,7 +686,7 @@ function renderPostHtml(post, templateHtml) {
   html = html.replace(/<meta property="og:url" content=".*?">/i, `<meta property="og:url" content="${canonicalUrl}">`);
   html = html.replace(/<meta property="og:title" content=".*?">/i, `<meta property="og:title" content="${escapedTitle}">`);
   html = html.replace(/<meta property="og:description" content=".*?">/i, `<meta property="og:description" content="${escapedDesc}">`);
-  html = html.replace(/<meta property="og:image" content=".*?">/i, `<meta property="og:image" content="${ogImg}">`);
+  html = html.replace(/<meta property="og:image" content=".*?">/i, `<meta property="og:image" content="${ogImg}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">\n  <meta property="og:site_name" content="DEKUTCONNECT Post">`);
 
   // Replace Twitter Card Meta Tags
   html = html.replace(/<meta name="twitter:url" content=".*?">/i, `<meta name="twitter:url" content="${canonicalUrl}">`);

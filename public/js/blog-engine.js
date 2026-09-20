@@ -45,8 +45,29 @@ async function initBlogIndex() {
   setupCategoryFilters();
   setupSearch();
   setupNewsletter();
+  setupSocialStats();
   updateCurrentDate();
   fetchRealWeatherForUser();
+}
+
+async function setupSocialStats() {
+  const igEl = document.getElementById('ig-follower-count');
+  const ytEl = document.getElementById('yt-subscriber-count');
+  if (!igEl && !ytEl) return;
+
+  try {
+    const apiUrl = window.getApiUrl('/api/social-stats');
+    const res = await fetch(apiUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.instagram?.formatted && igEl) {
+        igEl.textContent = data.instagram.formatted;
+      }
+      if (data?.youtube?.formatted && ytEl) {
+        ytEl.textContent = data.youtube.formatted;
+      }
+    }
+  } catch (e) {}
 }
 
 if (document.readyState === 'loading') {

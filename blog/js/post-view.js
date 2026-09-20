@@ -25,15 +25,19 @@ function resolveMediaUrl(url) {
 
 async function initPostView() {
   const loaderOverlay = document.getElementById('loader-overlay');
-  if (loaderOverlay) {
-    loaderOverlay.classList.add('hidden');
-    loaderOverlay.style.display = 'none';
+  if (loaderOverlay && !window.__INITIAL_POST__) {
+    loaderOverlay.classList.remove('hidden');
+    loaderOverlay.style.display = 'flex';
   }
 
   // 0. Instant SSR Hydration if server pre-rendered the article
   if (window.__INITIAL_POST__) {
     try {
       renderPost(window.__INITIAL_POST__);
+      if (loaderOverlay) {
+        loaderOverlay.classList.add('hidden');
+        loaderOverlay.style.display = 'none';
+      }
     } catch (e) {
       console.warn('Hydration note:', e.message);
     }
@@ -270,7 +274,8 @@ function setupRatingComponent(post) {
 }
 
 function setupShareButtons(post) {
-  const shareUrl = window.location.origin ? `${window.location.origin}/blog/${post.slug}` : `https://connect.dekut.site/blog/${post.slug}`;
+  // Use Vercel SSR URL so WhatsApp & social scrapers always get dynamic pre-rendered OG meta tags (og:image, og:title, og:description)
+  const shareUrl = `https://dekutconnect.vercel.app/blog/${post.slug}`;
   const shareTitle = `${post.title} — DEKUTCONNECT Post`;
 
   const btnWhatsapp = document.getElementById('share-whatsapp');
