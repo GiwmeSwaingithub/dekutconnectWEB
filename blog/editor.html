@@ -9,9 +9,22 @@
   <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
   <link rel="apple-touch-icon" href="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
 
-  <!-- 100% Self-Hosted Stylesheets (Zero Google Fonts CDN Calls) -->
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/uiverse-upload.css">
+  <!-- Preconnect to external image host -->
+  <link rel="preconnect" href="https://i.postimg.cc" crossorigin>
+
+  <!-- Preload Critical CSS (100% Self-Hosted, Zero Google Fonts CDN Calls) -->
+  <link rel="preload" as="style" href="/blog/css/style.css">
+  <link rel="preload" as="style" href="/blog/css/uiverse-upload.css">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/blog/css/style.css">
+  <link rel="stylesheet" href="/blog/css/uiverse-upload.css">
+
+  <!-- Preload Critical JS -->
+  <link rel="preload" as="script" href="/blog/js/cache-manager.js">
+  <link rel="preload" as="script" href="/blog/js/firebase-config.js">
+  <link rel="preload" as="script" href="/blog/js/legal-compliance.js">
+  <link rel="preload" as="script" href="/blog/js/admin-editor.js">
   
   <style>
     .editor-layout {
@@ -456,10 +469,10 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="/js/cache-manager.js"></script>
-  <script src="/js/firebase-config.js"></script>
-  <script src="/js/legal-compliance.js"></script>
-  <script src="/js/admin-editor.js"></script>
+  <!-- Scripts (all under /blog/js/) -->
+  <script src="/blog/js/cache-manager.js"></script>
+  <script src="/blog/js/firebase-config.js"></script>
+  <script src="/blog/js/legal-compliance.js"></script>
+  <script src="/blog/js/admin-editor.js"></script>
 </body>
 </html>
