@@ -112,9 +112,15 @@ class DatabaseService {
     const firebase = getFirebase();
     if (firebase) {
       try {
-        const snap = await firebase.db.collection('posts')
+        // 2.5s timeout so Firestore never hangs the UI
+        const snapPromise = firebase.db.collection('posts')
           .orderBy('publishedAt', 'desc')
           .get();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Firestore timeout')), 2500)
+        );
+
+        const snap = await Promise.race([snapPromise, timeoutPromise]);
         if (!snap.empty) {
           const posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           this._writeCache(posts);
@@ -125,7 +131,7 @@ class DatabaseService {
           return posts;
         }
       } catch (e) {
-        console.warn('[DEKUTCONNECT] Firestore read failed, trying REST fallback:', e.message);
+        console.warn('[DEKUTCONNECT] Firestore read fallback:', e.message);
       }
     }
 
@@ -156,31 +162,49 @@ class DatabaseService {
   }
 
   async getPostBySlug(slug) {
+    if (!slug) return null;
+    const cleanSlug = slug.trim().toLowerCase();
+
     // Check in-memory cache first
-    const cached = window.DKCache?.get?.(`post_${slug}`);
+    const cached = window.DKCache?.get?.(`post_${cleanSlug}`);
     if (cached) return cached;
 
     const firebase = getFirebase();
     if (firebase) {
       try {
-        const snap = await firebase.db.collection('posts')
-          .where('slug', '==', slug)
+        const snapPromise = firebase.db.collection('posts')
+          .where('slug', '==', cleanSlug)
           .limit(1)
           .get();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Firestore timeout')), 2500)
+        );
+
+        const snap = await Promise.race([snapPromise, timeoutPromise]);
         if (!snap.empty) {
           const post = { id: snap.docs[0].id, ...snap.docs[0].data() };
-          window.DKCache?.set?.(`post_${slug}`, post);
+          window.DKCache?.set?.(`post_${cleanSlug}`, post);
           return post;
         }
       } catch (e) {
-        console.warn('[DEKUTCONNECT] Firestore slug query failed:', e.message);
+        console.warn('[DEKUTCONNECT] Firestore slug query fallback:', e.message);
       }
     }
 
-    // Fallback: search the full posts list
+    // Fallback: search the full posts list (with exact and fuzzy slug matching)
     const posts = await this.getAllPosts();
-    const post = posts.find(p => p.slug === slug) || null;
-    if (post) window.DKCache?.set?.(`post_${slug}`, post);
+    let post = posts.find(p => p.slug === cleanSlug || (p.aliases && p.aliases.includes(cleanSlug)));
+    
+    // Fuzzy matching fallback if exact match not found
+    if (!post && posts.length > 0) {
+      if (cleanSlug.includes('parents-portal') || cleanSlug.includes('parents')) {
+        post = posts.find(p => p.slug.includes('parents') || p.title.toLowerCase().includes('parents')) || posts[0];
+      } else {
+        post = posts.find(p => p.slug.includes(cleanSlug) || cleanSlug.includes(p.slug));
+      }
+    }
+
+    if (post) window.DKCache?.set?.(`post_${cleanSlug}`, post);
     return post;
   }
 

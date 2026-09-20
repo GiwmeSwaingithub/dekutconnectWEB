@@ -103,46 +103,49 @@ def build():
         post_template = f.read()
     post_template = fix_html_asset_paths(post_template)
 
-    # Generate pre-rendered static HTML files for every post in posts.json
+    # Generate pre-rendered static HTML files for every post and alias in posts.json
     for post in posts:
         slug = post.get('slug')
         if not slug:
             continue
 
-        canonical_url = f"https://connect.dekut.site/blog/{slug}"
-        og_img = post.get('ogImage') or post.get('featuredImage') or CREST_IMAGE_URL
-        escaped_title = escape_html(post.get('title', ''))
-        escaped_desc = escape_html(post.get('excerpt', ''))
+        slugs_to_generate = [slug] + post.get('aliases', [])
 
-        html = post_template
-        html = re.sub(r'<title>.*?</title>', f'<title>{escaped_title} — DEKUTCONNECT Post</title>', html, flags=re.IGNORECASE)
-        html = re.sub(r'<link rel="canonical" href=".*?">', f'<link rel="canonical" href="{canonical_url}">', html, flags=re.IGNORECASE)
-        html = re.sub(r'<meta name="description" content=".*?">', f'<meta name="description" content="{escaped_desc}">', html, flags=re.IGNORECASE)
+        for s in slugs_to_generate:
+            canonical_url = f"https://connect.dekut.site/blog/{s}"
+            og_img = post.get('ogImage') or post.get('featuredImage') or CREST_IMAGE_URL
+            escaped_title = escape_html(post.get('title', ''))
+            escaped_desc = escape_html(post.get('excerpt', ''))
 
-        # Open Graph
-        html = re.sub(r'<meta property="og:url" content=".*?">', f'<meta property="og:url" content="{canonical_url}">', html, flags=re.IGNORECASE)
-        html = re.sub(r'<meta property="og:title" content=".*?">', f'<meta property="og:title" content="{escaped_title}">', html, flags=re.IGNORECASE)
-        html = re.sub(r'<meta property="og:description" content=".*?">', f'<meta property="og:description" content="{escaped_desc}">', html, flags=re.IGNORECASE)
-        html = re.sub(r'<meta property="og:image" content=".*?">', f'<meta property="og:image" content="{og_img}">', html, flags=re.IGNORECASE)
+            html = post_template
+            html = re.sub(r'<title>.*?</title>', f'<title>{escaped_title} — DEKUTCONNECT Post</title>', html, flags=re.IGNORECASE)
+            html = re.sub(r'<link rel="canonical" href=".*?">', f'<link rel="canonical" href="{canonical_url}">', html, flags=re.IGNORECASE)
+            html = re.sub(r'<meta name="description" content=".*?">', f'<meta name="description" content="{escaped_desc}">', html, flags=re.IGNORECASE)
 
-        # Twitter Card
-        html = re.sub(r'<meta name="twitter:url" content=".*?">', f'<meta name="twitter:url" content="{canonical_url}">', html, flags=re.IGNORECASE)
-        html = re.sub(r'<meta name="twitter:title" content=".*?">', f'<meta name="twitter:title" content="{escaped_title}">', html, flags=re.IGNORECASE)
-        html = re.sub(r'<meta name="twitter:description" content=".*?">', f'<meta name="twitter:description" content="{escaped_desc}">', html, flags=re.IGNORECASE)
-        html = re.sub(r'<meta name="twitter:image" content=".*?">', f'<meta name="twitter:image" content="{og_img}">', html, flags=re.IGNORECASE)
+            # Open Graph
+            html = re.sub(r'<meta property="og:url" content=".*?">', f'<meta property="og:url" content="{canonical_url}">', html, flags=re.IGNORECASE)
+            html = re.sub(r'<meta property="og:title" content=".*?">', f'<meta property="og:title" content="{escaped_title}">', html, flags=re.IGNORECASE)
+            html = re.sub(r'<meta property="og:description" content=".*?">', f'<meta property="og:description" content="{escaped_desc}">', html, flags=re.IGNORECASE)
+            html = re.sub(r'<meta property="og:image" content=".*?">', f'<meta property="og:image" content="{og_img}">', html, flags=re.IGNORECASE)
 
-        # Write blog/<slug>.html
-        post_html_file = os.path.join(BLOG_DIR, f"{slug}.html")
-        with open(post_html_file, 'w', encoding='utf-8') as f:
-            f.write(html)
+            # Twitter Card
+            html = re.sub(r'<meta name="twitter:url" content=".*?">', f'<meta name="twitter:url" content="{canonical_url}">', html, flags=re.IGNORECASE)
+            html = re.sub(r'<meta name="twitter:title" content=".*?">', f'<meta name="twitter:title" content="{escaped_title}">', html, flags=re.IGNORECASE)
+            html = re.sub(r'<meta name="twitter:description" content=".*?">', f'<meta name="twitter:description" content="{escaped_desc}">', html, flags=re.IGNORECASE)
+            html = re.sub(r'<meta name="twitter:image" content=".*?">', f'<meta name="twitter:image" content="{og_img}">', html, flags=re.IGNORECASE)
 
-        # Write blog/<slug>/index.html
-        post_dir = os.path.join(BLOG_DIR, slug)
-        os.makedirs(post_dir, exist_ok=True)
-        with open(os.path.join(post_dir, 'index.html'), 'w', encoding='utf-8') as f:
-            f.write(html)
+            # Write blog/<s>.html
+            post_html_file = os.path.join(BLOG_DIR, f"{s}.html")
+            with open(post_html_file, 'w', encoding='utf-8') as f:
+                f.write(html)
 
-        print(f"Generated static post pages for: {slug}")
+            # Write blog/<s>/index.html
+            post_dir = os.path.join(BLOG_DIR, s)
+            os.makedirs(post_dir, exist_ok=True)
+            with open(os.path.join(post_dir, 'index.html'), 'w', encoding='utf-8') as f:
+                f.write(html)
+
+            print(f"Generated static post pages for: {s}")
 
     # Generate smart 404.html in root and blog/404.html for SPA GitHub Pages fallback
     smart_404_content = """<!DOCTYPE html>

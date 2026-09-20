@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Favicon & Touch Icon (Official DEKUTCONNECT Emblem) -->
+  <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
+  <link rel="apple-touch-icon" href="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
+
+  <!-- Primary SEO Meta Tags (Server dynamically replaces these per blog for WhatsApp) -->
+  <title>Parents&#039; Portal for Monitoring Students&#039; Academic Performance and More — DEKUTCONNECT Post</title>
+  <meta name="description" content="During the first years (2026) parents&#039; engagement forum, parents were sensitised on University policies and processes and the use of the Parents and Guardians Portal to monitor their students&#039; academic progress and performance.">
+  <link rel="canonical" href="https://connect.dekut.site/blog/parents-portal-set-to-be-launched-at-dekut">
+
+  <!-- Open Graph / WhatsApp / Facebook (Replaced dynamically by server.js per blog) -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://connect.dekut.site/blog/parents-portal-set-to-be-launched-at-dekut">
+  <meta property="og:title" content="Parents&#039; Portal for Monitoring Students&#039; Academic Performance and More">
+  <meta property="og:description" content="During the first years (2026) parents&#039; engagement forum, parents were sensitised on University policies and processes and the use of the Parents and Guardians Portal to monitor their students&#039; academic progress and performance.">
+  <meta property="og:image" content="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://connect.dekut.site/blog/parents-portal-set-to-be-launched-at-dekut">
+  <meta name="twitter:title" content="Parents&#039; Portal for Monitoring Students&#039; Academic Performance and More">
+  <meta name="twitter:description" content="During the first years (2026) parents&#039; engagement forum, parents were sensitised on University policies and processes and the use of the Parents and Guardians Portal to monitor their students&#039; academic progress and performance.">
+  <meta name="twitter:image" content="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
+
+  <!-- Firebase SDK (loaded before firebase-config.js) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <!-- 100% Self-Hosted Stylesheets (Zero Google Fonts CDN Calls) -->
+  <link rel="stylesheet" href="/blog/css/style.css">
+  <link rel="stylesheet" href="/blog/css/uiverse-social.css">
+  <link rel="stylesheet" href="/blog/css/uiverse-rating.css">
+  <link rel="stylesheet" href="/blog/css/uiverse-loader.css">
+  
+  <style>
+    /* Reader Consent Gate (Before User Reads) */
+    .reader-consent-gate {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 99998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .reader-consent-gate.consented {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .consent-card {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 520px;
+      width: 100%;
+      padding: 2.2rem;
+      text-align: center;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+      border: 1px solid #e2e8f0;
+    }
+    .consent-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 1rem;
+      border: 2px solid #0f172a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .consent-title {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+    .consent-text {
+      font-size: 0.9rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+    .consent-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #334155;
+      margin-bottom: 1.5rem;
+      text-align: left;
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .consent-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .consent-btn-group {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+    .btn-consent-agree {
+      background: #b91c1c;
+      color: white;
+      border: none;
+      font-weight: 700;
+      padding: 0.75rem 1.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+      flex-grow: 1;
+    }
+    .btn-consent-agree:hover {
+      background: #991b1b;
+    }
+    .btn-consent-decline {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Animation (Uiverse.io by andrew-manzyk) -->
+  <div id="loader-overlay" class="loader-overlay">
+    <div class="loader">
+      <div class="text"><span>Loading</span></div>
+      <div class="text"><span>Loading</span></div>
+      <div class="text"><span>Loading</span></div>
+      <div class="text"><span>Loading</span></div>
+      <div class="text"><span>Loading</span></div>
+      <div class="text"><span>Loading</span></div>
+      <div class="text"><span>Loading</span></div>
+      <div class="text"><span>Loading</span></div>
+      <div class="text"><span>Loading</span></div>
+      <div class="line"></div>
+    </div>
+    <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 1.25rem; font-family: var(--font-serif); letter-spacing: 1px;">
+      PRINTING ARTICLE...
+    </div>
+  </div>
+
+  <!-- Mandatory Reader Consent Gate (Before User Reads) -->
+  <div id="reader-consent-gate" class="reader-consent-gate">
+    <div class="consent-card">
+      <img class="consent-logo" src="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg" alt="DEKUTCONNECT Emblem" />
+      <h2 class="consent-title">Reader Consent & Verification</h2>
+      <p class="consent-text">
+        Welcome to <strong>DEKUTCONNECT Post</strong>. In compliance with student digital privacy standards and statutory regulations, please confirm before reading:
+      </p>
+      <ul class="consent-checklist">
+        <li>
+          <span style="color: #16a34a; font-weight: bold;">✓</span>
+          <span><strong>Age Verification:</strong> I confirm I am 13 years of age or older (COPPA compliance).</span>
+        </li>
+        <li>
+          <span style="color: #16a34a; font-weight: bold;">✓</span>
+          <span><strong>Privacy Protection:</strong> I acknowledge session replay is disabled by default and inputs are masked.</span>
+        </li>
+        <li>
+          <span style="color: #16a34a; font-weight: bold;">✓</span>
+          <span><strong>Community Standards:</strong> I agree to respect campus editorial and copyright guidelines.</span>
+        </li>
+      </ul>
+      <div class="consent-btn-group">
+        <button id="btn-consent-agree" class="btn-consent-agree">I Agree & Read Article</button>
+        <button id="btn-consent-decline" class="btn-consent-decline" onclick="window.location.href='/blog'">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="container top-nav-inner">
+      <div class="date-edition">
+        <a href="/blog" style="font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 0.35rem;">
+          ← Return to Front Page
+        </a>
+      </div>
+      <div class="top-actions">
+        <a href="https://admin.dekut.site" target="_blank" class="legal-badge-link" style="color: #0f172a;">
+          Admin Portal (admin.dekut.site)
+        </a>
+        <a href="/blog/editor.html" class="btn-new-post">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Write Article
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Newspaper Masthead Header -->
+  <div class="newspaper-header" style="padding: 1rem 0 0.75rem;">
+    <div class="container">
+      <a href="/blog" class="masthead-title-wrap" style="text-decoration: none;">
+        <span class="masthead-part" style="font-size: clamp(1.8rem, 4.5vw, 3.2rem);">DEKUTCONNECT</span>
+        <img 
+          class="masthead-crest" 
+          src="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg" 
+          alt="Emblem" 
+          style="height: clamp(45px, 6vw, 65px); width: clamp(45px, 6vw, 65px); border-radius: 50%; object-fit: cover; border: 2px solid #0f172a;"
+        />
+        <span class="masthead-part" style="font-size: clamp(1.8rem, 4.5vw, 3.2rem);">POST</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Article Container -->
+  <main class="container">
+    
+    <!-- Article Header -->
+    <header class="article-header">
+      <span id="article-category" class="category-pill" style="position: static; margin-bottom: 1rem; display: inline-block;">
+        Campus News
+      </span>
+      <h1 id="article-title" class="article-title">Loading Article Headline...</h1>
+      <p id="article-deck" class="article-deck">Preparing article summary...</p>
+
+      <div class="article-author-bar">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <a id="author-profile-link" href="https://admin.dekut.site" target="_blank" title="View Admin Profile (admin.dekut.site)">
+            <img 
+              id="author-avatar" 
+              class="author-avatar" 
+              src="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg" 
+              alt="Author" 
+              style="border: 2px solid #0f172a;"
+            />
+          </a>
+          <div style="text-align: left;">
+            <a id="author-name-link" href="https://admin.dekut.site" target="_blank" style="color: #0f172a; text-decoration: underline;">
+              <strong id="author-name">dekutconnect admin</strong>
+            </a>
+            <div id="author-role" style="font-size: 0.75rem; color: var(--text-muted);">Campus Community Lead</div>
+          </div>
+        </div>
+        <span>•</span>
+        <span id="publish-date">September 19, 2026</span>
+        <span>•</span>
+        <span id="read-time">4 min read</span>
+      </div>
+    </header>
+
+    <!-- Featured Image -->
+    <div id="article-hero-media" class="article-hero-media">
+      <!-- Injected via post-view.js -->
+    </div>
+
+    <!-- Article Content -->
+    <article id="article-body" class="article-body-container">
+      <!-- Processed markdown and Instagram embeds will render here -->
+    </article>
+
+    <!-- Tags Row -->
+    <div id="article-tags" style="max-width: 780px; margin: 2rem auto 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+
+    <!-- Social Share Bar (WhatsApp, X, Facebook, LinkedIn, Copy) -->
+    <div class="share-bar" style="max-width: 780px; margin: 2rem auto;">
+      <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 0.5rem;">
+        Share Story:
+      </span>
+      <button id="share-whatsapp" class="share-btn share-whatsapp" title="Share directly to WhatsApp with preview image">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.044c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.125.556 4.122 1.527 5.861l-1.621 5.923 6.079-1.594c1.691.922 3.627 1.449 5.689 1.449 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>
+        WhatsApp
+      </button>
+      <button id="share-x" class="share-btn share-x">
+        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X (Twitter)
+      </button>
+      <button id="share-facebook" class="share-btn share-facebook">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.5 5H18V0h-3.808C10.595 0 9 1.583 9 4.615V8z"/></svg>
+        Facebook
+      </button>
+      <button id="share-linkedin" class="share-btn share-linkedin">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/></svg>
+        LinkedIn
+      </button>
+      <button id="share-copy" class="share-btn share-copy">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        Copy Link
+      </button>
+    </div>
+
+    <!-- Rating Component (Uiverse.io by Li-Deheng) -->
+    <div class="like-dislike-container" id="post-rating-container">
+      <div class="tool-box">
+        <button class="btn-close" title="Close">×</button>
+      </div>
+      <p class="text-content">What did you think<br>of this post?</p>				
+      <div class="icons-box">
+        <div class="icons">
+          <label class="btn-label" for="like-checkbox">
+            <span class="like-text-content">542</span>
+            <input class="input-box" id="like-checkbox" type="checkbox">
+            <svg class="svgs" id="icon-like-solid" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2H464c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48H294.5c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3V320 272 247.1c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192H96c17.7 0 32 14.3 32 32V448c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32V224c0-17.7 14.3-32 32-32z"></path></svg>
+            <svg class="svgs" id="icon-like-regular" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M323.8 34.8c-38.2-10.9-78.1 11.2-89 49.4l-5.7 20c-3.7 13-10.4 25-19.5 35l-51.3 56.4c-8.9 9.8-8.2 25 1.6 33.9s25 8.2 33.9-1.6l51.3-56.4c14.1-15.5 24.4-34 30.1-54.1l5.7-20c3.6-12.7 16.9-20.1 29.7-16.5s20.1 16.9 16.5 29.7l-5.7 20c-5.7 19.9-14.7 38.7-26.6 55.5c-5.2 7.3-5.8 16.9-1.7 24.9s12.3 13 21.3 13L448 224c8.8 0 16 7.2 16 16c0 6.8-4.3 12.7-10.4 15c-7.4 2.8-13 9-14.9 16.7s.1 15.8 5.3 21.7c2.5 2.8 4 6.5 4 10.6c0 7.8-5.6 14.3-13 15.7c-8.2 1.6-15.1 7.3-18 15.1s-1.6 16.7 3.6 23.3c2.1 2.7 3.4 6.1 3.4 9.9c0 6.7-4.2 12.6-10.2 14.9c-11.5 4.5-17.7 16.9-14.4 28.8c.4 1.3 .6 2.8 .6 4.3c0 8.8-7.2 16-16 16H286.5c-12.6 0-25-3.7-35.5-10.7l-61.7-41.1c-11-7.4-25.9-4.4-33.3 6.7s-4.4 25.9 6.7 33.3l61.7 41.1c18.4 12.3 40 18.8 62.1 18.8H384c34.7 0 62.9-27.6 64-62c14.6-11.7 24-29.7 24-50c0-4.5-.5-8.8-1.3-13c15.4-11.7 25.3-30.2 25.3-51c0-6.5-1-12.8-2.8-18.7C504.8 273.7 512 257.7 512 240c0-35.3-28.6-64-64-64l-92.3 0c4.7-10.4 8.7-21.2 11.8-32.2l5.7-20c10.9-38.2-11.2-78.1-49.4-89zM32 192c-17.7 0-32 14.3-32 32V448c0 17.7 14.3 32 32 32H96c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32H32z"></path></svg>
+            <div class="fireworks">
+              <div class="checked-like-fx"></div>
+            </div>
+          </label>
+        </div>
+        <div class="icons">
+          <label class="btn-label" for="dislike-checkbox">
+            <input class="input-box" id="dislike-checkbox" type="checkbox">
+            <div class="fireworks">
+              <div class="checked-dislike-fx"></div>
+            </div>
+            <svg class="svgs" id="icon-dislike-solid" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2H464c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48H294.5c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3V320 272 247.1c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192H96c17.7 0 32 14.3 32 32V448c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32V224c0-17.7 14.3-32 32-32z"></path></svg>
+            <svg class="svgs" id="icon-dislike-regular" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M323.8 34.8c-38.2-10.9-78.1 11.2-89 49.4l-5.7 20c-3.7 13-10.4 25-19.5 35l-51.3 56.4c-8.9 9.8-8.2 25 1.6 33.9s25 8.2 33.9-1.6l51.3-56.4c14.1-15.5 24.4-34 30.1-54.1l5.7-20c3.6-12.7 16.9-20.1 29.7-16.5s20.1 16.9 16.5 29.7l-5.7 20c-5.7 19.9-14.7 38.7-26.6 55.5c-5.2 7.3-5.8 16.9-1.7 24.9s12.3 13 21.3 13L448 224c8.8 0 16 7.2 16 16c0 6.8-4.3 12.7-10.4 15c-7.4 2.8-13 9-14.9 16.7s.1 15.8 5.3 21.7c2.5 2.8 4 6.5 4 10.6c0 7.8-5.6 14.3-13 15.7c-8.2 1.6-15.1 7.3-18 15.1s-1.6 16.7 3.6 23.3c2.1 2.7 3.4 6.1 3.4 9.9c0 6.7-4.2 12.6-10.2 14.9c-11.5 4.5-17.7 16.9-14.4 28.8c.4 1.3 .6 2.8 .6 4.3c0 8.8-7.2 16-16 16H286.5c-12.6 0-25-3.7-35.5-10.7l-61.7-41.1c-11-7.4-25.9-4.4-33.3 6.7s-4.4 25.9 6.7 33.3l61.7 41.1c18.4 12.3 40 18.8 62.1 18.8H384c34.7 0 62.9-27.6 64-62c14.6-11.7 24-29.7 24-50c0-4.5-.5-8.8-1.3-13c15.4-11.7 25.3-30.2 25.3-51c0-6.5-1-12.8-2.8-18.7C504.8 273.7 512 257.7 512 240c0-35.3-28.6-64-64-64l-92.3 0c4.7-10.4 8.7-21.2 11.8-32.2l5.7-20c10.9-38.2-11.2-78.1-49.4-89zM32 192c-17.7 0-32 14.3-32 32V448c0 17.7 14.3 32 32 32H96c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32H32z"></path></svg>
+            <span class="dislike-text-content">3</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Stories Section -->
+    <section style="margin: 4rem 0 2rem;">
+      <h3 style="font-family: var(--font-serif); font-size: 1.5rem; font-weight: 800; border-bottom: 2px solid #0f172a; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+        More Stories from DEKUTCONNECT Post
+      </h3>
+      <div class="sub-stories-grid" id="related-stories-grid">
+        <!-- Related stories injected via post-view.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Site Footer (CAN-SPAM & Legal Compliance) -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>DEKUTCONNECT Post</h4>
+          <p style="font-size: 0.85rem; line-height: 1.6; margin-bottom: 1rem;">
+            Published for the student, engineering, and cultural community of <a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">Dedan Kimathi University of Technology</a>.
+          </p>
+          <div class="can-spam-box">
+            <strong>Mandatory Physical Address (CAN-SPAM):</strong><br>
+            <a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Dedan Kimathi University of Technology</a><br>
+            Private Bag - 10143, Dedan Kimathi<br>
+            Nyeri, Kenya
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Legal & Compliance</h4>
+          <ul>
+            <li><a href="/blog/dmca.html">DMCA Designated Agent Notice</a></li>
+            <li><a href="/blog/legal-audit.html">Legal Exposure Audit Report</a></li>
+            <li><a href="https://admin.dekut.site" target="_blank">Admin Profile (admin.dekut.site)</a></li>
+            <li><a href="https://connect.dekut.site/unsubscribe">1-Click Unsubscribe (CAN-SPAM)</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 DEKUTCONNECT Post. Published at <a href="https://connect.dekut.site/blog" style="color: #38bdf8;">connect.dekut.site/blog</a> · <a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener" style="color: #38bdf8;">Dedan Kimathi University of Technology</a>
+        </div>
+        <div class="compliance-badges">
+          <span class="comp-badge">📍 DeKUT, Nyeri, Kenya</span>
+          <span class="comp-badge">🔒 Self-Hosted Fonts & Assets</span>
+          <span class="comp-badge">📰 Journalism Ethics Observed</span>
+          <span class="comp-badge">✓ DMCA Agent Designated</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/blog/js/cache-manager.js"></script>
+  <script src="/blog/js/firebase-config.js"></script>
+  <script src="/blog/js/legal-compliance.js"></script>
+  <script src="/blog/js/instagram-embed.js"></script>
+  <script src="/blog/js/post-view.js"></script>
+</body>
+</html>
