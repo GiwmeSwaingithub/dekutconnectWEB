@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.techAppProAllInOne.axtra",
+      "sha256_cert_fingerprints": [
+        "87:35:3D:C7:78:17:36:2A:51:2B:1B:5A:18:58:BA:34:FE:53:9B:75:56:CB:5F:41:EE:EE:88:E7:94:F8:10:EC"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.techAppProAllInOne.axtra",
+      "sha256_cert_fingerprints": [
+        "BE:22:26:06:4C:79:FF:70:18:B4:6C:82:99:CB:B5:37:20:71:3F:58:28:06:07:E6:F6:FC:67:FB:E5:B9:5B:6B"
+      ]
+    }
+  }
+]
