@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DEKUTCONNECT Post — Loading Article...</title>
+  <script>
+    (function() {
+      var path = window.location.pathname;
+      var parts = path.split('/').filter(Boolean);
+      
+      // If path is under /blog/<slug>
+      if (parts.length >= 1) {
+        var slug = parts[parts.length - 1].replace(/\.html$/, '');
+        if (slug && slug !== 'blog' && slug !== 'index') {
+          window.location.replace('/blog/post.html?slug=' + encodeURIComponent(slug));
+          return;
+        }
+      }
+      window.location.replace('/blog');
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirecting to DEKUTCONNECT Post...</p>
+</body>
+</html>

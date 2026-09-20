@@ -1,0 +1,106 @@
+/* From Uiverse.io by GigioBagigi0 - Social Cards */
+.social-card-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.social-card-wrapper .card {
+  display: flex;
+  width: 220px;
+  height: 50px;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 115px;
+  padding-inline: 15px;
+  position: relative;
+  justify-content: space-around;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.social-card-wrapper .social-icons {
+  cursor: pointer;
+  display: flex;
+  transition: all 0.5s;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: white;
+  font-weight: bold;
+  font-size: small;
+}
+
+.social-card-wrapper .social-icons > p {
+  --var: -0%;
+  position: absolute;
+  top: var(--var);
+  transition: all 0.7s;
+  background-color: dodgerblue;
+  border-radius: 7px;
+  opacity: 0;
+  padding-inline: 7px;
+  padding-block: 3px;
+  width: max-content;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.social-card-wrapper .social-icons > p::after {
+  content: "";
+  position: absolute;
+  border-top: 8px solid dodgerblue;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.social-card-wrapper .social-icons > a {
+  --var: -0%;
+  position: absolute;
+  bottom: var(--var);
+  width: max-content;
+  transition: all 0.7s;
+  opacity: 0;
+  padding-inline: 7px;
+  padding-block: 3px;
+  background-color: crimson;
+  border-radius: 7px;
+  font-size: 11px;
+  text-decoration: none;
+  color: #ffffff;
+  z-index: 20;
+}
+
+.social-card-wrapper .social-icons > a::after {
+  content: "";
+  position: absolute;
+  border-bottom: 8px solid crimson;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.social-card-wrapper .social-icons:hover > a,
+.social-card-wrapper .social-icons:hover > p {
+  --var: -65%;
+  opacity: 1;
+}
+
+.social-card-wrapper .social-icons:hover {
+  z-index: 15;
+}
+
+.social-card-wrapper .card:hover > .social-icons:not(:hover) {
+  filter: blur(3px);
+  transform: scale(0.8);
+}
+
+.social-card-wrapper .card svg {
+  height: 28px;
+  width: 28px;
+}

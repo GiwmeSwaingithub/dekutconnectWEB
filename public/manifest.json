@@ -1,0 +1,16 @@
+{
+  "name": "DEKUTCONNECT Post",
+  "short_name": "DEKUTCONNECT",
+  "description": "The Independent Digital Journal of Dedan Kimathi University of Technology",
+  "start_url": "/blog",
+  "display": "standalone",
+  "background_color": "#fdfbf7",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg",
+      "sizes": "150x150",
+      "type": "image/jpeg"
+    }
+  ]
+}
