@@ -8,9 +8,13 @@ PUBLIC_DIR = os.path.join(REPO_DIR, 'public')
 POSTS_FILE = os.path.join(REPO_DIR, 'posts.json')
 BLOG_DIR = os.path.join(REPO_DIR, 'blog')
 
+import time
+
+BUILD_VERSION = int(time.time())
+
 def fix_html_asset_paths(html_content):
     """
-    Ensure all stylesheet link tags and script tags use /blog/ relative or base /blog/ paths.
+    Ensure all stylesheet link tags and script tags use /blog/ relative or base /blog/ paths with cache-busting version query parameters.
     """
     # Fix absolute root CSS paths -> /blog/css/
     html_content = re.sub(r'href="/css/', 'href="/blog/css/', html_content)
@@ -22,6 +26,10 @@ def fix_html_asset_paths(html_content):
     # Fix absolute root assets -> /blog/assets/
     html_content = re.sub(r'src="/assets/', 'src="/blog/assets/', html_content)
     html_content = re.sub(r'href="/assets/', 'href="/blog/assets/', html_content)
+
+    # Append cache-busting version parameter to all script and style tags
+    html_content = re.sub(r'src="(/blog/js/[^"?]+)(\?v=\d+)?"', f'src="\\1?v={BUILD_VERSION}"', html_content)
+    html_content = re.sub(r'href="(/blog/css/[^"?]+)(\?v=\d+)?"', f'href="\\1?v={BUILD_VERSION}"', html_content)
 
     # Fix navigation links to stay within /blog/
     html_content = re.sub(r'href="/editor\.html"', 'href="/blog/editor.html"', html_content)
