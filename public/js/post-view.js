@@ -309,8 +309,14 @@ function parseSimpleMarkdown(text) {
     .replace(/\*(.*?)\*/gim, '<em>$1</em>')
     .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
     .replace(/^\- (.*$)/gim, '<li>$1</li>')
-    .replace(/\!\[video\]\((.*?)\)/gim, '<div class="article-hero-video-container" style="margin: 1.5rem 0;"><video controls playsinline src="$1"></video></div>')
-    .replace(/\!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" style="width:100%; border-radius:6px; margin: 1.25rem 0;" />')
+    .replace(/\!\[video\]\((.*?)\)/gim, (m, src) => {
+      const resolvedSrc = resolveMediaUrl(src);
+      return `<div class="article-hero-video-container" style="margin: 1.5rem 0;"><video controls playsinline src="${resolvedSrc}"></video></div>`;
+    })
+    .replace(/\!\[(.*?)\]\((.*?)\)/gim, (m, alt, src) => {
+      const resolvedSrc = resolveMediaUrl(src);
+      return `<img src="${resolvedSrc}" alt="${alt}" style="width:100%; border-radius:6px; margin: 1.25rem 0;" />`;
+    })
     .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" style="color: #b91c1c; text-decoration: underline;">$1</a>')
     .split(/\n\n+/)
     .map(p => {

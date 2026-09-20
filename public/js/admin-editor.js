@@ -92,9 +92,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const excerpt = excerptInput.value.trim();
     const content = contentInput.value.trim();
     const mediaType = mediaTypeSelect ? mediaTypeSelect.value : 'image';
-    const videoUrl = videoUrlInput ? videoUrlInput.value.trim() : '';
-    const featuredImage = featuredImageInput.value.trim() || DEFAULT_EMBLEM_URL;
-    const ogImage = ogImageInput.value.trim() || featuredImage;
+    let videoUrl = videoUrlInput ? videoUrlInput.value.trim() : '';
+    if (videoUrl.startsWith('/api/')) {
+      videoUrl = `https://dekutconnect.vercel.app${videoUrl}`;
+    }
+    let featuredImage = featuredImageInput ? featuredImageInput.value.trim() : '';
+    if (featuredImage.startsWith('/api/')) {
+      featuredImage = `https://dekutconnect.vercel.app${featuredImage}`;
+    }
+    let ogImage = ogImageInput ? ogImageInput.value.trim() : '';
+    if (ogImage.startsWith('/api/')) {
+      ogImage = `https://dekutconnect.vercel.app${ogImage}`;
+    }
+
+    // Auto-fallback: NEVER forcefully block or require manual entry
+    if (!featuredImage) {
+      featuredImage = DEFAULT_EMBLEM_URL;
+    }
+    if (!ogImage) {
+      ogImage = featuredImage;
+    }
+
     const category = categorySelect.value;
     const authorName = authorNameInput.value.trim() || 'dekutconnect admin';
     const authorRole = authorRoleInput.value.trim() || 'Campus Community Lead';
@@ -140,8 +158,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const saved = await window.DKDB.savePost(postData);
       const targetSlug = saved?.slug || slug;
       
-      // Instant redirect to new article
-      window.location.href = `/blog/${targetSlug}`;
+      // Instant redirect to new article (works on GitHub Pages & Vercel)
+      if (window.location.hostname === 'connect.dekut.site') {
+        window.location.href = `/blog/post.html?slug=${encodeURIComponent(targetSlug)}`;
+      } else {
+        window.location.href = `/blog/${targetSlug}`;
+      }
     } catch (err) {
       alert(`Publishing failed: ${err.message}`);
       if (submitBtn) {
@@ -380,19 +402,34 @@ function setupUiverseUploader() {
 
       try {
         const uploadResult = await uploadMediaFile(file, isVideo);
-        const uploadedUrl = uploadResult.url;
+        let uploadedUrl = uploadResult.url;
+        if (uploadedUrl && uploadedUrl.startsWith('/api/')) {
+          uploadedUrl = `https://dekutconnect.vercel.app${uploadedUrl}`;
+        }
 
         if (fileStatusText) fileStatusText.textContent = file.name;
         
         renderPreview(uploadedUrl, file.name, uploadResult.isVideo);
 
+        const mediaTypeSelect = document.getElementById('post-media-type');
+        const videoUrlInput = document.getElementById('post-video-url');
+
         if (!uploadResult.isVideo) {
           if (featuredImageInput) featuredImageInput.value = uploadedUrl;
           if (ogImageInput) ogImageInput.value = uploadedUrl;
+          if (mediaTypeSelect) mediaTypeSelect.value = 'image';
         } else {
+          if (mediaTypeSelect) mediaTypeSelect.value = 'video';
+          if (videoUrlInput) videoUrlInput.value = uploadedUrl;
+          if (featuredImageInput && (!featuredImageInput.value || featuredImageInput.value === DEFAULT_EMBLEM_URL)) {
+            featuredImageInput.value = DEFAULT_EMBLEM_URL;
+          }
+          if (ogImageInput && !ogImageInput.value) {
+            ogImageInput.value = DEFAULT_EMBLEM_URL;
+          }
           // If video uploaded, append embedded video tag to article content
           if (contentInput) {
-            const videoMarkdown = `\n\n<video controls playsinline style="width:100%; border-radius:8px; margin: 1rem 0;">\n  <source src="${uploadedUrl}" type="${file.type || 'video/mp4'}">\n</video>\n\n`;
+            const videoMarkdown = `\n\n<video controls playsinline style="width:100%; border-radius:8px; margin: 1rem 0;">\n  <source src="${uploadedUrl}" type="${file.type || 'video/mp4'}">\n  Your browser does not support HTML5 video playback.\n</video>\n\n`;
             contentInput.value = (contentInput.value || '') + videoMarkdown;
           }
         }
@@ -562,7 +599,20 @@ function setupEditorToolbar(textarea) {
     }
 
     try {
-      const url = await uploadImageFile(file);
+      const rawUrl = await uploadImageFile(file);
+      const url = (rawUrl && rawUrl.startsWith('/api/')) ? `https://dekutconnect.vercel.app${rawUrl}` : rawUrl;
+
+      // Auto-populate featured image and OG image if empty or still default emblem
+      const featuredImgEl = document.getElementById('post-featured-image');
+      const ogImgEl = document.getElementById('post-og-image');
+      if (featuredImgEl && (!featuredImgEl.value || featuredImgEl.value === DEFAULT_EMBLEM_URL)) {
+        featuredImgEl.value = url;
+      }
+      if (ogImgEl && (!ogImgEl.value || ogImgEl.value === DEFAULT_EMBLEM_URL)) {
+        ogImgEl.value = url;
+      }
+      updateLiveSeoPreview();
+
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
       const text = textarea.value;

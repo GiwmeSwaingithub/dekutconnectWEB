@@ -145,7 +145,7 @@ class DatabaseService {
   async _fetchFirestoreRest() {
     try {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 2500);
+      const timer = setTimeout(() => controller.abort(), 4000);
       const res = await fetch(this.FIRESTORE_REST_URL, { signal: controller.signal });
       clearTimeout(timer);
       if (res.ok) {
@@ -373,10 +373,12 @@ class DatabaseService {
       // Server not available (GitHub Pages) — Firestore write is sufficient
     }
 
-    // Invalidate caches
-    this._invalidateCache();
-    window.DKCache?.invalidate?.('all_posts');
-    window.DKCache?.invalidate?.(`post_${post.slug}`);
+    // Immediately prime memory & local cache with new post
+    const currentPosts = this._readCache() || [];
+    const updatedPosts = [post, ...currentPosts.filter(p => p.slug !== post.slug)];
+    this._writeCache(updatedPosts);
+    window.DKCache?.set?.('all_posts', updatedPosts);
+    window.DKCache?.set?.(`post_${post.slug}`, post);
 
     return post;
   }

@@ -390,7 +390,7 @@
 
             <div class="form-group">
               <label class="form-label" for="post-author-profile">Author Profile URL (admin.dekut.site)</label>
-              <input type="url" id="post-author-profile" class="form-control" value="https://admin.dekut.site" />
+              <input type="text" id="post-author-profile" class="form-control" value="https://admin.dekut.site" />
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
@@ -403,19 +403,20 @@
               </div>
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label" for="post-video-url">Video Source URL (Optional / Direct MP4 or YouTube)</label>
-                <input type="url" id="post-video-url" class="form-control" placeholder="https://.../video.mp4 or YouTube link" />
+                <input type="text" id="post-video-url" class="form-control" placeholder="Auto-fills on video upload, or enter MP4 / YouTube link" />
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="post-featured-image">Featured Article Cover / Thumbnail Image URL</label>
-              <input type="url" id="post-featured-image" class="form-control" placeholder="https://i.postimg.cc/..." value="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg" />
+              <input type="text" id="post-featured-image" class="form-control" placeholder="Auto-fills when you upload an image, or enter image link" value="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg" />
+              <small style="color: #64748b; font-size: 0.75rem;">Automatically set when uploading media. No manual entry needed unless you want to customize.</small>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="post-og-image">Custom WhatsApp / OpenGraph Share Image URL</label>
-              <input type="url" id="post-og-image" class="form-control" placeholder="Automatically matches selected image" />
-              <small style="color: #64748b; font-size: 0.75rem;">This exact image appears when you share the link to WhatsApp or social platforms.</small>
+              <input type="text" id="post-og-image" class="form-control" placeholder="Auto-fills to match your featured image" />
+              <small style="color: #64748b; font-size: 0.75rem;">Automatically matches selected image for WhatsApp and social shares.</small>
             </div>
 
             <!-- Content Area with Quick Toolbar -->

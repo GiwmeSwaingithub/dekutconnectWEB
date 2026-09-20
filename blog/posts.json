@@ -87,5 +87,28 @@
     ],
     "likes": 0,
     "dislikes": 0
+  },
+  {
+    "id": "jaMPRmsbMvFeO2eimGtK",
+    "slug": "movie",
+    "title": "movie",
+    "excerpt": "movie test upload",
+    "category": "Campus & Tech",
+    "mediaType": "image",
+    "videoUrl": "",
+    "featuredImage": "https://dekutconnect.vercel.app/api/media/images/1789899352402_chatgpt_image_sep_12_2026_10_33_39_am.png",
+    "ogImage": "https://dekutconnect.vercel.app/api/media/images/1789899352402_chatgpt_image_sep_12_2026_10_33_39_am.png",
+    "author": {
+      "name": "dekutconnect admin",
+      "role": "Campus Community Lead",
+      "avatar": "https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg",
+      "profileUrl": "https://admin.dekut.site"
+    },
+    "content": "> quote test\n*italic test*\n**bold test**\n\n### h3 example\n\n## h2sample\n\n![Image description](https://dekutconnect.vercel.app/api/media/images/1789899352402_chatgpt_image_sep_12_2026_10_33_39_am.png)",
+    "publishedAt": "2026-09-20T10:17:16.144Z",
+    "readTime": "1 MIN READ",
+    "tags": ["News"],
+    "likes": 0,
+    "dislikes": 0
   }
 ]

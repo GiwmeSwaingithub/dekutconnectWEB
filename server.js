@@ -412,22 +412,69 @@ function os_mkdir(dirPath) {
 // -------------------------------------------------------------
 // REST API ENDPOINTS (Supports /api/* and /blog/api/*)
 // -------------------------------------------------------------
-app.get(['/api/posts', '/blog/api/posts'], (req, res) => {
+app.get(['/api/posts', '/blog/api/posts'], async (req, res) => {
+  // Serve from memory cache first
+  if (postsCache.length > 0) {
+    return res.json(postsCache);
+  }
+  // Fall back to Firestore if cache is empty
+  try {
+    const allPosts = await fetchAllFromFirestore();
+    if (allPosts && allPosts.length > 0) {
+      postsCache.push(...allPosts.filter(np => !postsCache.find(p => p.slug === np.slug)));
+    }
+  } catch(e) {}
   res.json(postsCache);
 });
 
-app.get(['/api/posts/:slug', '/blog/api/posts/:slug'], (req, res) => {
-  const post = postsCache.find(p => p.slug === req.params.slug);
+app.get(['/api/posts/:slug', '/blog/api/posts/:slug'], async (req, res) => {
+  const cleanSlug = String(req.params.slug || '').toLowerCase().trim();
+  let post = postsCache.find(p => p.slug === cleanSlug || (p.aliases && p.aliases.includes(cleanSlug)));
+  if (!post) {
+    post = await fetchFromFirestoreBySlug(cleanSlug);
+    if (post) postsCache.push(post);
+  }
   if (!post) return res.status(404).json({ error: 'Post not found' });
   res.json(post);
 });
 
-// Helper: Dynamic fallback to fetch article from Firestore by slug
-async function fetchFromFirestoreBySlug(slug) {
+
+// Helper: Parse a Firestore REST document into a plain post object
+function parseFirestoreDocServer(doc) {
+  const f = doc.fields || {};
+  const docSlug = f.slug?.stringValue?.toLowerCase() || doc.name?.split('/').pop();
+  return {
+    id: f.id?.stringValue || doc.name?.split('/').pop(),
+    slug: docSlug,
+    title: f.title?.stringValue || '',
+    excerpt: f.excerpt?.stringValue || '',
+    category: f.category?.stringValue || 'Campus & Tech',
+    mediaType: f.mediaType?.stringValue || 'image',
+    videoUrl: f.videoUrl?.stringValue || '',
+    featuredImage: f.featuredImage?.stringValue || CREST_IMAGE_URL,
+    ogImage: f.ogImage?.stringValue || f.featuredImage?.stringValue || CREST_IMAGE_URL,
+    content: f.content?.stringValue || '',
+    publishedAt: f.publishedAt?.stringValue || new Date().toISOString(),
+    readTime: f.readTime?.stringValue || '4 min read',
+    likes: parseInt(f.likes?.integerValue || '0', 10),
+    dislikes: parseInt(f.dislikes?.integerValue || '0', 10),
+    tags: f.tags?.arrayValue?.values?.map(v => v.stringValue).filter(Boolean) || ['News'],
+    aliases: f.aliases?.arrayValue?.values?.map(v => v.stringValue).filter(Boolean) || [],
+    author: {
+      name: f.author?.mapValue?.fields?.name?.stringValue || 'dekutconnect admin',
+      role: f.author?.mapValue?.fields?.role?.stringValue || 'Campus Community Lead',
+      avatar: f.author?.mapValue?.fields?.avatar?.stringValue || CREST_IMAGE_URL,
+      profileUrl: f.author?.mapValue?.fields?.profileUrl?.stringValue || 'https://admin.dekut.site'
+    }
+  };
+}
+
+// Helper: Fetch ALL posts from Firestore REST API
+async function fetchAllFromFirestore() {
   try {
     const url = 'https://firestore.googleapis.com/v1/projects/dekutconnect-official/databases/(default)/documents/posts';
     const res = await new Promise((resolve) => {
-      https.get(url, { timeout: 3000 }, (r) => {
+      https.get(url, { timeout: 4000 }, (r) => {
         let b = '';
         r.on('data', d => b += d);
         r.on('end', () => {
@@ -435,30 +482,34 @@ async function fetchFromFirestoreBySlug(slug) {
         });
       }).on('error', () => resolve(null));
     });
-    if (!res || !res.documents) return null;
-    for (const doc of res.documents) {
-      const f = doc.fields || {};
-      const docSlug = f.slug?.stringValue?.toLowerCase();
-      if (docSlug === slug || (slug.includes('parents') && docSlug?.includes('parents'))) {
-        return {
-          id: f.id?.stringValue || doc.name.split('/').pop(),
-          slug: docSlug,
-          title: f.title?.stringValue || '',
-          excerpt: f.excerpt?.stringValue || '',
-          category: f.category?.stringValue || 'Campus & Tech',
-          featuredImage: f.featuredImage?.stringValue || CREST_IMAGE_URL,
-          ogImage: f.ogImage?.stringValue || f.featuredImage?.stringValue || CREST_IMAGE_URL,
-          author: {
-            name: f.author?.mapValue?.fields?.name?.stringValue || 'dekutconnect admin',
-            role: f.author?.mapValue?.fields?.role?.stringValue || 'Campus Community Lead',
-            profileUrl: f.author?.mapValue?.fields?.profileUrl?.stringValue || 'https://admin.dekut.site'
-          },
-          publishedAt: f.publishedAt?.stringValue || new Date().toISOString()
-        };
-      }
-    }
+    if (!res || !res.documents) return [];
+    return res.documents.map(doc => parseFirestoreDocServer(doc)).filter(p => p.slug);
+  } catch(e) {}
+  return [];
+}
+
+// Helper: Dynamic fallback to fetch article from Firestore by slug
+async function fetchFromFirestoreBySlug(slug) {
+  try {
+    const all = await fetchAllFromFirestore();
+    if (!all || !all.length) return null;
+    return all.find(p =>
+      p.slug === slug ||
+      (p.aliases && p.aliases.includes(slug)) ||
+      (slug.includes('parents') && (p.slug?.includes('parents') || p.title?.toLowerCase().includes('parents')))
+    ) || null;
   } catch (e) {}
   return null;
+}
+
+// Helper: Resolve relative /api/media/ URLs to absolute Vercel URLs for server-side rendering
+function resolveServerMediaUrl(url) {
+  if (!url) return url;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+  if (url.startsWith('/api/media/') || url.startsWith('/api/')) {
+    return `https://dekutconnect.vercel.app${url}`;
+  }
+  return url;
 }
 
 // Helper: Markdown parser for server-side HTML pre-rendering
@@ -472,8 +523,14 @@ function parseSimpleMarkdownServer(text) {
     .replace(/\*(.*?)\*/gim, '<em>$1</em>')
     .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
     .replace(/^\- (.*$)/gim, '<li>$1</li>')
-    .replace(/\!\[video\]\((.*?)\)/gim, '<div class="article-hero-video-container" style="margin: 1.5rem 0;"><video controls playsinline src="$1"></video></div>')
-    .replace(/\!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" style="width:100%; border-radius:6px; margin: 1.25rem 0;" />')
+    .replace(/\!\[video\]\((.*?)\)/gim, (m, src) => {
+      const resolvedSrc = resolveServerMediaUrl(src);
+      return `<div class="article-hero-video-container" style="margin: 1.5rem 0;"><video controls playsinline src="${resolvedSrc}"></video></div>`;
+    })
+    .replace(/\!\[(.*?)\]\((.*?)\)/gim, (m, alt, src) => {
+      const resolvedSrc = resolveServerMediaUrl(src);
+      return `<img src="${resolvedSrc}" alt="${alt}" style="width:100%; border-radius:6px; margin: 1.25rem 0;" />`;
+    })
     .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" style="color: #b91c1c; text-decoration: underline;">$1</a>')
     .split(/\n\n+/)
     .map(p => {
