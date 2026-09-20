@@ -34,9 +34,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
   <!-- 100% Self-Hosted Stylesheets (Zero Google Fonts CDN Calls) -->
-  <link rel="stylesheet" href="/blog/css/style.css?v=1789907338">
-  <link rel="stylesheet" href="/blog/css/uiverse-social.css?v=1789907338">
-  <link rel="stylesheet" href="/blog/css/uiverse-loader.css?v=1789907338">
+  <link rel="stylesheet" href="/blog/css/style.css?v=1789909159">
+  <link rel="stylesheet" href="/blog/css/uiverse-social.css?v=1789909159">
+  <link rel="stylesheet" href="/blog/css/uiverse-loader.css?v=1789909159">
 </head>
 <body>
   <!-- Top Navigation & Edition Header -->
@@ -52,12 +52,9 @@
           <span style="display:inline-block; width:8px; height:8px; background:#16a34a; border-radius:50%;"></span>
           Legal Audit Passed
         </a>
-        <a href="https://admin.dekut.site" target="_blank" class="legal-badge-link" style="color: #0f172a;">
-          Admin Portal
-        </a>
         <a href="/blog/editor.html" class="btn-new-post">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          New Article
+          Write Article
         </a>
       </div>
     </div>
@@ -227,18 +224,18 @@
                 </svg>
               </div>
             </div>
+          </div>
 
-            <!-- Live Instagram Followers & YouTube Subscribers Counter -->
-            <div class="social-stats-bar" id="social-stats-bar" style="margin-top: 0.85rem; padding: 0.6rem 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; justify-content: space-around; align-items: center; font-size: 0.8rem; font-weight: 700; color: #1e293b;">
-              <div style="display: flex; align-items: center; gap: 0.4rem;" title="Instagram Followers">
-                <span style="color: #e1306c; font-size: 1rem;">📸</span>
-                <span id="ig-follower-count">7.8K</span> Followers
-              </div>
-              <div style="border-left: 1px solid #cbd5e1; height: 16px;"></div>
-              <div style="display: flex; align-items: center; gap: 0.4rem;" title="YouTube Subscribers">
-                <span style="color: #ff0000; font-size: 1rem;">▶</span>
-                <span id="yt-subscriber-count">3</span> Subscribers
-              </div>
+          <!-- Live Instagram Followers & YouTube Subscribers Counter (Positioned Below Social Icons) -->
+          <div class="social-stats-bar" id="social-stats-bar" style="margin: 0.85rem auto 0; width: 100%; max-width: 260px; padding: 0.6rem 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; justify-content: space-around; align-items: center; font-size: 0.82rem; font-weight: 700; color: #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+            <div style="display: flex; align-items: center; gap: 0.35rem;" title="Instagram Followers">
+              <span style="color: #e1306c; font-size: 1rem;">📸</span>
+              <span id="ig-follower-count">7.8K</span> Followers
+            </div>
+            <div style="border-left: 1px solid #cbd5e1; height: 16px;"></div>
+            <div style="display: flex; align-items: center; gap: 0.35rem;" title="YouTube Subscribers">
+              <span style="color: #ff0000; font-size: 1rem;">▶</span>
+              <span id="yt-subscriber-count">3</span> Subscribers
             </div>
           </div>
         </div>
@@ -267,12 +264,9 @@
         <!-- Campus Highlights -->
         <div class="widget-card">
           <div class="widget-title">About DEKUTCONNECT</div>
-          <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin-bottom: 0.75rem;">
+          <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin-bottom: 0.25rem;">
             <a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener" style="color: #0f172a; text-decoration: underline; font-weight: 700;">Dedan Kimathi University of Technology</a> Students Platform. <strong>7,843+ followers</strong> enjoying daily campus vibes, trending juice, and original memes.
           </p>
-          <a href="https://admin.dekut.site" target="_blank" style="font-size: 0.8rem; font-weight: 700; color: #b91c1c;">
-            Visit Admin Desk (admin.dekut.site) →
-          </a>
         </div>
 
       </aside>
@@ -303,8 +297,7 @@
             <li><a href="/blog?category=Tech+%26+Law">Tech & Law</a></li>
             <li><a href="/blog?category=Life+%26+Culture">Life & Culture</a></li>
             <li><a href="/blog?category=Innovation">Innovation & Research</a></li>
-            <li><a href="https://admin.dekut.site" target="_blank">Admin Profile (admin.dekut.site)</a></li>
-            <li><a href="/blog/editor.html">Author Submissions</a></li>
+            <li><a href="/blog/editor.html">Write Article</a></li>
           </ul>
         </div>
 
@@ -321,7 +314,7 @@
 
       <div class="footer-bottom">
         <div>
-          © 2026 DEKUTCONNECT Post. Published at <a href="https://connect.dekut.site/blog" style="color: #38bdf8;">connect.dekut.site/blog</a>. Curated by <a href="https://admin.dekut.site" target="_blank" style="color: #38bdf8;">dekutconnect admin</a>.
+          © 2026 DEKUTCONNECT Post. Published at <a href="https://connect.dekut.site/blog" style="color: #38bdf8;">connect.dekut.site/blog</a>. Curated by dekutconnect admin.
         </div>
         <div class="compliance-badges">
           <span class="comp-badge">📍 Dedan Kimathi University of Technology, Nyeri</span>
@@ -334,10 +327,10 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="/blog/js/cache-manager.js?v=1789907338"></script>
-  <script src="/blog/js/firebase-config.js?v=1789907338"></script>
-  <script src="/blog/js/legal-compliance.js?v=1789907338"></script>
-  <script src="/blog/js/instagram-embed.js?v=1789907338"></script>
-  <script src="/blog/js/blog-engine.js?v=1789907338"></script>
+  <script src="/blog/js/cache-manager.js?v=1789909159"></script>
+  <script src="/blog/js/firebase-config.js?v=1789909159"></script>
+  <script src="/blog/js/legal-compliance.js?v=1789909159"></script>
+  <script src="/blog/js/instagram-embed.js?v=1789909159"></script>
+  <script src="/blog/js/blog-engine.js?v=1789909159"></script>
 </body>
 </html>
