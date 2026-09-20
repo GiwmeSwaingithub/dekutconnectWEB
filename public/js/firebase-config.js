@@ -210,12 +210,12 @@ class DatabaseService {
   }
 
   async _fetchStaticPostsJson() {
-    const urls = ['/blog/posts.json', '/posts.json'];
+    const urls = [`/blog/posts.json?v=${Date.now()}`, `/posts.json?v=${Date.now()}`];
     for (const url of urls) {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 1500);
-        const res = await fetch(url, { signal: controller.signal });
+        const timer = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch(url, { signal: controller.signal, cache: 'no-cache' });
         clearTimeout(timer);
         if (res.ok) {
           const posts = await res.json();
@@ -251,27 +251,23 @@ class DatabaseService {
     const mem = window.DKCache?.get?.(`post_${cleanSlug}`);
     if (mem) return mem;
 
-    // 2. localStorage cache (instant 0ms)
-    const localPosts = this._readCache();
-    if (localPosts && Array.isArray(localPosts)) {
-      const localMatch = this._findMatchingPost(localPosts, cleanSlug);
-      if (localMatch) {
-        window.DKCache?.set?.(`post_${cleanSlug}`, localMatch);
-        return localMatch;
+    // 2. Direct Vercel backend API fetch by slug (authoritative, ~100ms)
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      const apiUrl = window.getApiUrl(`/api/posts/${encodeURIComponent(cleanSlug)}`);
+      const res = await fetch(apiUrl, { signal: controller.signal, cache: 'no-cache' });
+      clearTimeout(timer);
+      if (res.ok) {
+        const post = await res.json();
+        if (post && post.title && post.content) {
+          window.DKCache?.set?.(`post_${cleanSlug}`, post);
+          return post;
+        }
       }
-    }
+    } catch (e) {}
 
-    // 3. Fast Static JSON Fetch (SAME ORIGIN, 20-50ms)
-    const staticPosts = await this._fetchStaticPostsJson();
-    if (staticPosts) {
-      const match = this._findMatchingPost(staticPosts, cleanSlug);
-      if (match) {
-        window.DKCache?.set?.(`post_${cleanSlug}`, match);
-        return match;
-      }
-    }
-
-    // 4. Firestore REST API (Fast, pure HTTP, ~150ms)
+    // 3. Firestore REST API (Fast, pure HTTP, ~150ms)
     const restPosts = await this._fetchFirestoreRest();
     if (restPosts) {
       const match = this._findMatchingPost(restPosts, cleanSlug);
@@ -281,20 +277,25 @@ class DatabaseService {
       }
     }
 
-    // 5. Vercel backend API fallback
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch(window.getApiUrl(`/api/posts/${encodeURIComponent(cleanSlug)}`), { signal: controller.signal });
-      clearTimeout(timer);
-      if (res.ok) {
-        const post = await res.json();
-        if (post && post.title) {
-          window.DKCache?.set?.(`post_${cleanSlug}`, post);
-          return post;
-        }
+    // 4. Fast Static JSON Fetch with Cache-Buster
+    const staticPosts = await this._fetchStaticPostsJson();
+    if (staticPosts) {
+      const match = this._findMatchingPost(staticPosts, cleanSlug);
+      if (match) {
+        window.DKCache?.set?.(`post_${cleanSlug}`, match);
+        return match;
       }
-    } catch (e) {}
+    }
+
+    // 5. localStorage cache fallback
+    const localPosts = this._readCache();
+    if (localPosts && Array.isArray(localPosts)) {
+      const localMatch = this._findMatchingPost(localPosts, cleanSlug);
+      if (localMatch) {
+        window.DKCache?.set?.(`post_${cleanSlug}`, localMatch);
+        return localMatch;
+      }
+    }
 
     // 6. Final fallback: search all posts
     const all = await this.getAllPosts();
