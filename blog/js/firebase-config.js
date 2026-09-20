@@ -42,8 +42,6 @@ function getFirebase() {
     }
     _auth = firebase.auth();
     _db = firebase.firestore();
-    // Firestore offline persistence (caches last-known data for offline readers)
-    _db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
     return { auth: _auth, db: _db };
   } catch (e) {
     console.warn('[DEKUTCONNECT] Firebase SDK unavailable, falling back to REST API:', e.message);
@@ -71,8 +69,9 @@ window.getApiUrl = function(endpoint) {
 // ─── Database Service ─────────────────────────────────────────────────────────
 class DatabaseService {
   constructor() {
-    this.CACHE_KEY = 'dekut_posts_v5';
+    this.CACHE_KEY = 'dekut_posts_v6';
     this.CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+    this.FIRESTORE_REST_URL = 'https://firestore.googleapis.com/v1/projects/dekutconnect-official/databases/(default)/documents/posts';
   }
 
   _readCache() {
@@ -81,13 +80,15 @@ class DatabaseService {
       if (!raw) return null;
       const { data, ts } = JSON.parse(raw);
       if (Date.now() - ts > this.CACHE_TTL) return null;
-      return data;
+      return Array.isArray(data) ? data : null;
     } catch (e) { return null; }
   }
 
   _writeCache(posts) {
     try {
-      localStorage.setItem(this.CACHE_KEY, JSON.stringify({ data: posts, ts: Date.now() }));
+      if (Array.isArray(posts) && posts.length > 0) {
+        localStorage.setItem(this.CACHE_KEY, JSON.stringify({ data: posts, ts: Date.now() }));
+      }
     } catch (e) {}
   }
 
@@ -95,129 +96,209 @@ class DatabaseService {
     try { localStorage.removeItem(this.CACHE_KEY); } catch (e) {}
   }
 
-  async getAllPosts() {
-    // 1. Serve from in-memory cache instantly if available
-    const mem = window.DKCache?.get?.('all_posts');
-    if (mem) return mem;
+  _findMatchingPost(posts, cleanSlug) {
+    if (!Array.isArray(posts) || !cleanSlug) return null;
+    let match = posts.find(p => p.slug === cleanSlug || (p.aliases && p.aliases.includes(cleanSlug)));
+    if (!match) {
+      if (cleanSlug.includes('parents-portal') || cleanSlug.includes('parents')) {
+        match = posts.find(p => (p.slug && p.slug.includes('parents')) || (p.title && p.title.toLowerCase().includes('parents'))) || posts[0];
+      } else {
+        match = posts.find(p => (p.slug && p.slug.includes(cleanSlug)) || (cleanSlug.includes(p.slug)));
+      }
+    }
+    return match || null;
+  }
 
-    // 2. Serve from localStorage cache (15-min TTL) while revalidating in background
+  _parseFirestoreDoc(doc) {
+    if (!doc || !doc.fields) return null;
+    const f = doc.fields;
+    const id = f.id?.stringValue || doc.name?.split('/').pop();
+    const slug = f.slug?.stringValue || id;
+    const title = f.title?.stringValue || '';
+    const excerpt = f.excerpt?.stringValue || '';
+    const category = f.category?.stringValue || 'Campus & Tech';
+    const mediaType = f.mediaType?.stringValue || 'image';
+    const videoUrl = f.videoUrl?.stringValue || '';
+    const featuredImage = f.featuredImage?.stringValue || CREST_IMAGE_URL;
+    const ogImage = f.ogImage?.stringValue || featuredImage;
+    const content = f.content?.stringValue || '';
+    const publishedAt = f.publishedAt?.stringValue || new Date().toISOString();
+    const readTime = f.readTime?.stringValue || '4 min read';
+    const likes = parseInt(f.likes?.integerValue || '0', 10);
+    const dislikes = parseInt(f.dislikes?.integerValue || '0', 10);
+    const tags = f.tags?.arrayValue?.values?.map(v => v.stringValue).filter(Boolean) || ['News'];
+    const aliases = f.aliases?.arrayValue?.values?.map(v => v.stringValue).filter(Boolean) || [];
+    const authorMap = f.author?.mapValue?.fields || {};
+    const author = {
+      name: authorMap.name?.stringValue || 'dekutconnect admin',
+      role: authorMap.role?.stringValue || 'Campus Community Lead',
+      avatar: authorMap.avatar?.stringValue || CREST_IMAGE_URL,
+      profileUrl: authorMap.profileUrl?.stringValue || 'https://admin.dekut.site'
+    };
+    return {
+      id, slug, title, excerpt, category, mediaType, videoUrl,
+      featuredImage, ogImage, content, publishedAt, readTime,
+      likes, dislikes, tags, aliases, author
+    };
+  }
+
+  async _fetchFirestoreRest() {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2500);
+      const res = await fetch(this.FIRESTORE_REST_URL, { signal: controller.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.documents && Array.isArray(data.documents)) {
+          const posts = data.documents.map(d => this._parseFirestoreDoc(d)).filter(Boolean);
+          if (posts.length > 0) {
+            posts.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+            this._writeCache(posts);
+            window.DKCache?.set?.('all_posts', posts);
+            return posts;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[DEKUTCONNECT] Firestore REST fetch note:', e.message);
+    }
+    return null;
+  }
+
+  async getAllPosts() {
+    // 1. Serve from in-memory cache instantly (0ms)
+    const mem = window.DKCache?.get?.('all_posts');
+    if (mem && Array.isArray(mem) && mem.length > 0) return mem;
+
+    // 2. Serve from localStorage cache (0ms) while revalidating in background
     const cached = this._readCache();
-    if (cached) {
+    if (cached && Array.isArray(cached) && cached.length > 0) {
       window.DKCache?.set?.('all_posts', cached);
-      // Background revalidation
-      setTimeout(() => this._fetchFromFirestore(true), 100);
+      setTimeout(() => this._backgroundRevalidate(), 200);
       return cached;
     }
 
-    return await this._fetchFromFirestore(false);
-  }
-
-  async _fetchFromFirestore(background = false) {
-    const firebase = getFirebase();
-    if (firebase) {
-      try {
-        // 2.5s timeout so Firestore never hangs the UI
-        const snapPromise = firebase.db.collection('posts')
-          .orderBy('publishedAt', 'desc')
-          .get();
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Firestore timeout')), 2500)
-        );
-
-        const snap = await Promise.race([snapPromise, timeoutPromise]);
-        if (!snap.empty) {
-          const posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          this._writeCache(posts);
-          window.DKCache?.set?.('all_posts', posts);
-          if (background && typeof window.onPostsRevalidated === 'function') {
-            window.onPostsRevalidated(posts);
-          }
-          return posts;
-        }
-      } catch (e) {
-        console.warn('[DEKUTCONNECT] Firestore read fallback:', e.message);
-      }
+    // 3. Fast Static JSON Fetch (SAME ORIGIN CDN, ~30ms)
+    const staticPosts = await this._fetchStaticPostsJson();
+    if (staticPosts && staticPosts.length > 0) {
+      setTimeout(() => this._backgroundRevalidate(), 300);
+      return staticPosts;
     }
 
-    // 3. Fallback: static posts.json (works even without Firestore)
+    // 4. Firestore REST API (Fast, pure HTTP, ~150ms)
+    const restPosts = await this._fetchFirestoreRest();
+    if (restPosts && restPosts.length > 0) return restPosts;
+
+    // 5. Vercel backend API fallback
     try {
-      const res = await fetch(window.getApiUrl('/api/posts'));
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2500);
+      const res = await fetch(window.getApiUrl('/api/posts'), { signal: controller.signal });
+      clearTimeout(timer);
       if (res.ok) {
         const posts = await res.json();
-        this._writeCache(posts);
-        window.DKCache?.set?.('all_posts', posts);
-        return posts;
+        if (Array.isArray(posts) && posts.length > 0) {
+          this._writeCache(posts);
+          window.DKCache?.set?.('all_posts', posts);
+          return posts;
+        }
       }
     } catch (e) {}
 
-    // 4. Final fallback: local posts.json file (GitHub Pages static)
-    try {
-      const staticRes = await fetch('/blog/posts.json');
-      if (staticRes.ok) {
-        const posts = await staticRes.json();
-        this._writeCache(posts);
-        window.DKCache?.set?.('all_posts', posts);
-        return posts;
-      }
-    } catch (e) {}
+    return [];
+  }
 
-    const cached2 = this._readCache();
-    return cached2 || [];
+  async _fetchStaticPostsJson() {
+    const urls = ['/blog/posts.json', '/posts.json'];
+    for (const url of urls) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 1500);
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        if (res.ok) {
+          const posts = await res.json();
+          if (Array.isArray(posts) && posts.length > 0) {
+            this._writeCache(posts);
+            window.DKCache?.set?.('all_posts', posts);
+            return posts;
+          }
+        }
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  async _backgroundRevalidate() {
+    const restPosts = await this._fetchFirestoreRest();
+    if (restPosts && typeof window.onPostsRevalidated === 'function') {
+      window.onPostsRevalidated(restPosts);
+    }
   }
 
   async getPostBySlug(slug) {
     if (!slug) return null;
     const cleanSlug = slug.trim().toLowerCase();
 
-    // 1. Check in-memory cache first
-    const cached = window.DKCache?.get?.(`post_${cleanSlug}`);
-    if (cached) return cached;
+    // 0. Pre-rendered post from SSR (instant 0ms)
+    if (window.__INITIAL_POST__) {
+      const initMatch = this._findMatchingPost([window.__INITIAL_POST__], cleanSlug);
+      if (initMatch) return initMatch;
+    }
 
-    // 2. Check localStorage cache (instant, 0ms)
+    // 1. In-memory cache (instant 0ms)
+    const mem = window.DKCache?.get?.(`post_${cleanSlug}`);
+    if (mem) return mem;
+
+    // 2. localStorage cache (instant 0ms)
     const localPosts = this._readCache();
     if (localPosts && Array.isArray(localPosts)) {
-      const localMatch = localPosts.find(p => p.slug === cleanSlug || (p.aliases && p.aliases.includes(cleanSlug)) || (cleanSlug.includes('parents') && (p.slug.includes('parents') || p.title?.toLowerCase().includes('parents'))));
+      const localMatch = this._findMatchingPost(localPosts, cleanSlug);
       if (localMatch) {
         window.DKCache?.set?.(`post_${cleanSlug}`, localMatch);
         return localMatch;
       }
     }
 
-    const firebase = getFirebase();
-    if (firebase) {
-      try {
-        const snapPromise = firebase.db.collection('posts')
-          .where('slug', '==', cleanSlug)
-          .limit(1)
-          .get();
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Firestore timeout')), 1200)
-        );
+    // 3. Fast Static JSON Fetch (SAME ORIGIN, 20-50ms)
+    const staticPosts = await this._fetchStaticPostsJson();
+    if (staticPosts) {
+      const match = this._findMatchingPost(staticPosts, cleanSlug);
+      if (match) {
+        window.DKCache?.set?.(`post_${cleanSlug}`, match);
+        return match;
+      }
+    }
 
-        const snap = await Promise.race([snapPromise, timeoutPromise]);
-        if (!snap.empty) {
-          const post = { id: snap.docs[0].id, ...snap.docs[0].data() };
+    // 4. Firestore REST API (Fast, pure HTTP, ~150ms)
+    const restPosts = await this._fetchFirestoreRest();
+    if (restPosts) {
+      const match = this._findMatchingPost(restPosts, cleanSlug);
+      if (match) {
+        window.DKCache?.set?.(`post_${cleanSlug}`, match);
+        return match;
+      }
+    }
+
+    // 5. Vercel backend API fallback
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(window.getApiUrl(`/api/posts/${encodeURIComponent(cleanSlug)}`), { signal: controller.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        const post = await res.json();
+        if (post && post.title) {
           window.DKCache?.set?.(`post_${cleanSlug}`, post);
           return post;
         }
-      } catch (e) {
-        console.warn('[DEKUTCONNECT] Firestore slug query fallback:', e.message);
       }
-    }
+    } catch (e) {}
 
-    // Fallback: search the full posts list (with exact and fuzzy slug matching)
-    const posts = await this.getAllPosts();
-    let post = posts.find(p => p.slug === cleanSlug || (p.aliases && p.aliases.includes(cleanSlug)));
-    
-    // Fuzzy matching fallback if exact match not found
-    if (!post && posts.length > 0) {
-      if (cleanSlug.includes('parents-portal') || cleanSlug.includes('parents')) {
-        post = posts.find(p => p.slug.includes('parents') || p.title.toLowerCase().includes('parents')) || posts[0];
-      } else {
-        post = posts.find(p => p.slug.includes(cleanSlug) || cleanSlug.includes(p.slug));
-      }
-    }
-
+    // 6. Final fallback: search all posts
+    const all = await this.getAllPosts();
+    const post = this._findMatchingPost(all, cleanSlug);
     if (post) window.DKCache?.set?.(`post_${cleanSlug}`, post);
     return post;
   }

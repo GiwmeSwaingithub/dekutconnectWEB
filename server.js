@@ -54,7 +54,7 @@ const AVATAR_PLACEHOLDER = '/images/avatar-placeholder.svg';
 // In-Memory Rate Limiter (Sliding Window per IP)
 const ipRequestCounts = new Map();
 const RATE_LIMIT_WINDOW_MS = 10000; // 10 seconds
-const MAX_REQUESTS_PER_WINDOW = 120; // 120 req / 10s per IP (generous for browsing, blocks DDoS)
+const MAX_REQUESTS_PER_WINDOW = 300; // 300 req / 10s per IP (high-traffic headroom for 1M readers)
 const UPLOAD_RATE_LIMIT = 20; // max 20 uploads / minute per IP
 const ipUploadCounts = new Map();
 const ipRateCounts = new Map();
@@ -78,7 +78,8 @@ setInterval(() => {
 
 // Global Threat Protection & Security Middleware
 app.use((req, res, next) => {
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+  const rawForwarded = req.headers['x-forwarded-for'];
+  const clientIp = rawForwarded ? rawForwarded.split(',')[0].trim() : (req.socket.remoteAddress || '127.0.0.1');
   const userAgent = req.headers['user-agent'] || '';
   const now = Date.now();
 
@@ -460,20 +461,172 @@ async function fetchFromFirestoreBySlug(slug) {
   return null;
 }
 
-// -------------------------------------------------------------
-// DYNAMIC OPEN GRAPH INJECTION FOR SINGLE ARTICLES
-// -------------------------------------------------------------
-app.get('/blog/:slug', async (req, res) => {
-  const { slug } = req.params;
+// Helper: Markdown parser for server-side HTML pre-rendering
+function parseSimpleMarkdownServer(text) {
+  if (!text) return '';
+  let html = text
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+    .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+    .replace(/^\- (.*$)/gim, '<li>$1</li>')
+    .replace(/\!\[video\]\((.*?)\)/gim, '<div class="article-hero-video-container" style="margin: 1.5rem 0;"><video controls playsinline src="$1"></video></div>')
+    .replace(/\!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" style="width:100%; border-radius:6px; margin: 1.25rem 0;" />')
+    .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" style="color: #b91c1c; text-decoration: underline;">$1</a>')
+    .split(/\n\n+/)
+    .map(p => {
+      p = p.trim();
+      if (!p) return '';
+      if (p.startsWith('<h') || p.startsWith('<blockquote') || p.startsWith('<div') || p.startsWith('<li>') || p.startsWith('<a') || p.startsWith('<img')) {
+        return p;
+      }
+      return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+    })
+    .join('\n');
 
-  // If slug matches editor or static pages, safety fallback
-  if (slug === 'editor.html' || slug === 'editor') {
-    return res.sendFile(path.join(PUBLIC_DIR, 'editor.html'));
+  const parts = html.split(/(<a\b[^>]*>.*?<\/a>)/gi);
+  return parts.map(part => {
+    if (part.toLowerCase().startsWith('<a')) return part;
+    return part
+      .replace(/\b(Dedan Kimathi University of Technology)\b/gi, '<a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">$1</a>')
+      .replace(/\b(Dedan Kimathi University)\b/gi, '<a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">$1</a>')
+      .replace(/\b(DeKUT)\b/g, '<a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">$1</a>');
+  }).join('');
+}
+
+// Pre-render article template into complete, SEO-ready, instant-loading HTML
+function renderPostHtml(post, templateHtml) {
+  let html = templateHtml;
+  const canonicalUrl = `https://connect.dekut.site/blog/${post.slug}`;
+  const ogImg = post.ogImage || post.featuredImage || CREST_IMAGE_URL;
+  const escapedTitle = escapeHtml(post.title);
+  const escapedDesc = escapeHtml(post.excerpt);
+
+  // Replace Title & Canonical
+  html = html.replace(/<title>.*?<\/title>/i, `<title>${escapedTitle} — DEKUTCONNECT Post</title>`);
+  html = html.replace(/<link rel="canonical" href=".*?">/i, `<link rel="canonical" href="${canonicalUrl}">`);
+  html = html.replace(/<meta name="description" content=".*?">/i, `<meta name="description" content="${escapedDesc}">`);
+
+  // Replace Open Graph Meta Tags (For WhatsApp, Facebook, LinkedIn)
+  html = html.replace(/<meta property="og:url" content=".*?">/i, `<meta property="og:url" content="${canonicalUrl}">`);
+  html = html.replace(/<meta property="og:title" content=".*?">/i, `<meta property="og:title" content="${escapedTitle}">`);
+  html = html.replace(/<meta property="og:description" content=".*?">/i, `<meta property="og:description" content="${escapedDesc}">`);
+  html = html.replace(/<meta property="og:image" content=".*?">/i, `<meta property="og:image" content="${ogImg}">`);
+
+  // Replace Twitter Card Meta Tags
+  html = html.replace(/<meta name="twitter:url" content=".*?">/i, `<meta name="twitter:url" content="${canonicalUrl}">`);
+  html = html.replace(/<meta name="twitter:title" content=".*?">/i, `<meta name="twitter:title" content="${escapedTitle}">`);
+  html = html.replace(/<meta name="twitter:description" content=".*?">/i, `<meta name="twitter:description" content="${escapedDesc}">`);
+  html = html.replace(/<meta name="twitter:image" content=".*?">/i, `<meta name="twitter:image" content="${ogImg}">`);
+
+  // Inject Schema.org Article Structured Data (JSON-LD) and window.__INITIAL_POST__
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": post.title,
+    "image": [ogImg],
+    "datePublished": post.publishedAt || new Date().toISOString(),
+    "dateModified": post.publishedAt || new Date().toISOString(),
+    "author": [{
+      "@type": "Person",
+      "name": post.author?.name || "dekutconnect admin",
+      "url": post.author?.profileUrl || "https://admin.dekut.site"
+    }],
+    "publisher": {
+      "@type": "Organization",
+      "name": "DEKUTCONNECT Post",
+      "logo": {
+        "@type": "ImageObject",
+        "url": CREST_IMAGE_URL
+      }
+    },
+    "description": post.excerpt,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": canonicalUrl
+    }
+  };
+
+  const scriptJsonLd = `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`;
+  const scriptInitialPost = `<script>window.__INITIAL_POST__ = ${JSON.stringify(post)};</script>`;
+  html = html.replace('</head>', `${scriptJsonLd}\n${scriptInitialPost}\n</head>`);
+
+  // Pre-render visible headline & summary
+  html = html.replace(/<h1 id="article-title"[^>]*>.*?<\/h1>/i, `<h1 id="article-title" class="article-title">${escapedTitle}</h1>`);
+  html = html.replace(/<p id="article-deck"[^>]*>.*?<\/p>/i, `<p id="article-deck" class="article-deck">${escapedDesc}</p>`);
+  html = html.replace(/<span id="article-category"[^>]*>.*?<\/span>/i, `<span id="article-category" class="category-pill" style="position: static; margin-bottom: 1rem; display: inline-block;">${escapeHtml(post.category || 'General')}</span>`);
+
+  const authorName = escapeHtml(post.author?.name || 'dekutconnect admin');
+  const authorRole = escapeHtml(post.author?.role || 'Campus Community Lead');
+  const authorProfileUrl = post.author?.profileUrl || 'https://admin.dekut.site';
+  const authorAvatar = post.author?.avatar || CREST_IMAGE_URL;
+
+  html = html.replace(/<strong id="author-name">.*?<\/strong>/i, `<strong id="author-name">${authorName}</strong>`);
+  html = html.replace(/<div id="author-role"[^>]*>.*?<\/div>/i, `<div id="author-role" style="font-size: 0.75rem; color: var(--text-muted);">${authorRole}</div>`);
+  html = html.replace(/id="author-avatar"[^>]*src="[^"]*"/i, `id="author-avatar" src="${authorAvatar}" alt="${authorName}"`);
+  html = html.replace(/id="author-name-link"[^>]*href="[^"]*"/i, `id="author-name-link" href="${authorProfileUrl}"`);
+  html = html.replace(/id="author-profile-link"[^>]*href="[^"]*"/i, `id="author-profile-link" href="${authorProfileUrl}"`);
+
+  const d = new Date(post.publishedAt || Date.now());
+  const formattedDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  html = html.replace(/<span id="publish-date">.*?<\/span>/i, `<span id="publish-date">${formattedDate}</span>`);
+  html = html.replace(/<span id="read-time">.*?<\/span>/i, `<span id="read-time">${escapeHtml(post.readTime || '4 min read')}</span>`);
+
+  // Pre-render Hero Media (Video or Image)
+  const isVideo = post.mediaType === 'video' || !!post.videoUrl || (post.featuredImage && (post.featuredImage.endsWith('.mp4') || post.featuredImage.endsWith('.webm')));
+  const rawVideoSrc = post.videoUrl || post.featuredImage;
+  let heroMediaHtml = '';
+  if (isVideo && rawVideoSrc) {
+    if (rawVideoSrc.includes('youtube.com') || rawVideoSrc.includes('youtu.be')) {
+      let ytId = '';
+      if (rawVideoSrc.includes('youtu.be/')) ytId = rawVideoSrc.split('youtu.be/')[1].split('?')[0];
+      else if (rawVideoSrc.includes('v=')) ytId = rawVideoSrc.split('v=')[1].split('&')[0];
+      else if (rawVideoSrc.includes('embed/')) ytId = rawVideoSrc.split('embed/')[1].split('?')[0];
+      const embedUrl = ytId ? `https://www.youtube.com/embed/${ytId}?autoplay=0` : rawVideoSrc;
+      heroMediaHtml = `
+        <div class="article-hero-video-container">
+          <iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="article-caption">Video feature — DEKUTCONNECT Post Digital Edition</div>
+      `;
+    } else {
+      heroMediaHtml = `
+        <div class="article-hero-video-container">
+          <video controls playsinline poster="${post.ogImage || ''}">
+            <source src="${rawVideoSrc}" type="video/mp4">
+            Your browser does not support HTML5 video playback.
+          </video>
+        </div>
+        <div class="article-caption">Video feature — DEKUTCONNECT Post Digital Edition</div>
+      `;
+    }
+  } else if (post.featuredImage) {
+    heroMediaHtml = `
+      <img src="${post.featuredImage}" alt="${escapedTitle}" onerror="this.onerror=null;this.src='${CREST_IMAGE_URL}'" />
+      <div class="article-caption">Photo / Media feature — DEKUTCONNECT Post Digital Edition</div>
+    `;
   }
-  if (slug === 'dmca.html' || slug === 'dmca') {
-    return res.sendFile(path.join(PUBLIC_DIR, 'dmca.html'));
+  html = html.replace(/<div id="article-hero-media"[^>]*>[\s\S]*?<\/div>/i, `<div id="article-hero-media" class="article-hero-media">${heroMediaHtml}</div>`);
+
+  // Pre-render Article Body with parsed markdown
+  const bodyHtml = parseSimpleMarkdownServer(post.content);
+  html = html.replace(/<article id="article-body"[^>]*>[\s\S]*?<\/article>/i, `<article id="article-body" class="article-body-container">${bodyHtml}</article>`);
+
+  // Pre-render Tags
+  if (post.tags && post.tags.length) {
+    const tagsHtml = post.tags.map(t => `<span class="category-pill" style="position:static; margin-right: 0.5rem;">#${escapeHtml(t)}</span>`).join('');
+    html = html.replace(/<div id="article-tags"[^>]*>[\s\S]*?<\/div>/i, `<div id="article-tags" style="max-width: 780px; margin: 2rem auto 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">${tagsHtml}</div>`);
   }
 
+  return html;
+}
+
+// -------------------------------------------------------------
+// DYNAMIC SERVER PRE-RENDERING FOR SINGLE ARTICLES
+// -------------------------------------------------------------
+async function handleSinglePostRequest(slug, req, res) {
   const cleanSlug = String(slug || '').toLowerCase().trim();
   let post = postsCache.find(p => 
     p.slug === cleanSlug || 
@@ -497,61 +650,39 @@ app.get('/blog/:slug', async (req, res) => {
   let html = fs.readFileSync(postHtmlPath, 'utf8');
 
   if (post) {
-    const canonicalUrl = `https://connect.dekut.site/blog/${post.slug}`;
-    const ogImg = post.ogImage || post.featuredImage || CREST_IMAGE_URL;
-    const escapedTitle = escapeHtml(post.title);
-    const escapedDesc = escapeHtml(post.excerpt);
-
-    // Replace Title & Canonical
-    html = html.replace(/<title>.*?<\/title>/i, `<title>${escapedTitle} — DEKUTCONNECT Post</title>`);
-    html = html.replace(/<link rel="canonical" href=".*?">/i, `<link rel="canonical" href="${canonicalUrl}">`);
-    html = html.replace(/<meta name="description" content=".*?">/i, `<meta name="description" content="${escapedDesc}">`);
-
-    // Replace Open Graph Meta Tags (For WhatsApp, Facebook, LinkedIn)
-    html = html.replace(/<meta property="og:url" content=".*?">/i, `<meta property="og:url" content="${canonicalUrl}">`);
-    html = html.replace(/<meta property="og:title" content=".*?">/i, `<meta property="og:title" content="${escapedTitle}">`);
-    html = html.replace(/<meta property="og:description" content=".*?">/i, `<meta property="og:description" content="${escapedDesc}">`);
-    html = html.replace(/<meta property="og:image" content=".*?">/i, `<meta property="og:image" content="${ogImg}">`);
-
-    // Replace Twitter Card Meta Tags
-    html = html.replace(/<meta name="twitter:url" content=".*?">/i, `<meta name="twitter:url" content="${canonicalUrl}">`);
-    html = html.replace(/<meta name="twitter:title" content=".*?">/i, `<meta name="twitter:title" content="${escapedTitle}">`);
-    html = html.replace(/<meta name="twitter:description" content=".*?">/i, `<meta name="twitter:description" content="${escapedDesc}">`);
-    html = html.replace(/<meta name="twitter:image" content=".*?">/i, `<meta name="twitter:image" content="${ogImg}">`);
-
-    // Inject Schema.org Article Structured Data (JSON-LD)
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "NewsArticle",
-      "headline": post.title,
-      "image": [ogImg],
-      "datePublished": post.publishedAt || new Date().toISOString(),
-      "dateModified": post.publishedAt || new Date().toISOString(),
-      "author": [{
-        "@type": "Person",
-        "name": post.author?.name || "dekutconnect admin",
-        "url": post.author?.profileUrl || "https://admin.dekut.site"
-      }],
-      "publisher": {
-        "@type": "Organization",
-        "name": "DEKUTCONNECT Post",
-        "logo": {
-          "@type": "ImageObject",
-          "url": CREST_IMAGE_URL
-        }
-      },
-      "description": post.excerpt,
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": canonicalUrl
-      }
-    };
-
-    const scriptJsonLd = `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`;
-    html = html.replace('</head>', `${scriptJsonLd}\n</head>`);
+    html = renderPostHtml(post, html);
   }
 
   res.send(html);
+}
+
+// Route for /blog/post.html and /post.html (with optional ?slug= query param)
+app.get(['/blog/post.html', '/post.html'], async (req, res) => {
+  const slug = req.query.slug;
+  if (slug) {
+    return await handleSinglePostRequest(slug, req, res);
+  }
+  res.sendFile(path.join(PUBLIC_DIR, 'post.html'));
+});
+
+// Dynamic Route for /blog/:slug
+app.get('/blog/:slug', async (req, res) => {
+  const { slug } = req.params;
+
+  // If slug matches editor or static pages, safety fallback
+  if (slug === 'editor.html' || slug === 'editor') {
+    return res.sendFile(path.join(PUBLIC_DIR, 'editor.html'));
+  }
+  if (slug === 'dmca.html' || slug === 'dmca') {
+    return res.sendFile(path.join(PUBLIC_DIR, 'dmca.html'));
+  }
+  if (slug === 'post.html' || slug === 'post') {
+    const querySlug = req.query.slug;
+    if (querySlug) return await handleSinglePostRequest(querySlug, req, res);
+    return res.sendFile(path.join(PUBLIC_DIR, 'post.html'));
+  }
+
+  await handleSinglePostRequest(slug, req, res);
 });
 
 // PROTECTED: Only authenticated admins can add/update articles

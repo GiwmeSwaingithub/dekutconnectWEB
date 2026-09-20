@@ -30,6 +30,15 @@ async function initPostView() {
     loaderOverlay.style.display = 'none';
   }
 
+  // 0. Instant SSR Hydration if server pre-rendered the article
+  if (window.__INITIAL_POST__) {
+    try {
+      renderPost(window.__INITIAL_POST__);
+    } catch (e) {
+      console.warn('Hydration note:', e.message);
+    }
+  }
+
   const params = new URLSearchParams(window.location.search);
   let slug = params.get('slug');
   if (!slug) {
@@ -39,17 +48,24 @@ async function initPostView() {
     }
   }
 
+  const targetSlug = slug || 'parents-portal-for-monitoring-students-academic-performance-and-more';
+
+  // If already rendered via SSR matching targetSlug, skip re-fetching
+  if (window.__INITIAL_POST__ && (window.__INITIAL_POST__.slug === targetSlug || (targetSlug.includes('parents') && window.__INITIAL_POST__.slug.includes('parents')))) {
+    return;
+  }
+
   try {
-    const post = await window.DKDB.getPostBySlug(slug || 'parents-portal-for-monitoring-students-academic-performance-and-more');
+    const post = await window.DKDB.getPostBySlug(targetSlug);
 
     if (!post) {
-      showError('Article Not Found', `The requested article "${slug || ''}" does not exist.`);
+      showError('Article Not Found', `The requested article "${targetSlug}" could not be located.`);
     } else {
       renderPost(post);
     }
   } catch (err) {
     console.error('Error loading article:', err);
-    showError('Error Loading Article', err.message);
+    showError('Unable to Load Article', err.message || 'Please refresh or return to the front page.');
   } finally {
     if (loaderOverlay) {
       loaderOverlay.classList.add('hidden');
@@ -162,13 +178,13 @@ function renderPost(post) {
   }
 
   // Setup Uiverse.io Li-Deheng Rating Component
-  setupRatingComponent(post);
+  try { setupRatingComponent(post); } catch (e) {}
 
   // Setup Social Sharing
-  setupShareButtons(post);
+  try { setupShareButtons(post); } catch (e) {}
 
   // Load Related Stories
-  loadRelatedStories(post);
+  try { loadRelatedStories(post); } catch (e) {}
 }
 
 function setupRatingComponent(post) {
@@ -361,13 +377,22 @@ async function loadRelatedStories(currentPost) {
 }
 
 function showError(title, msg) {
-  const container = document.querySelector('main') || document.querySelector('.container');
-  if (container) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 4rem 1rem;">
-        <h2 style="font-family: var(--font-serif); font-size: 2rem; color: #b91c1c; margin-bottom: 1rem;">${escapeHtml(title)}</h2>
+  const titleEl = document.getElementById('article-title');
+  if (titleEl) titleEl.textContent = title;
+
+  const deckEl = document.getElementById('article-deck');
+  if (deckEl) deckEl.textContent = msg;
+
+  const heroMediaEl = document.getElementById('article-hero-media');
+  if (heroMediaEl) heroMediaEl.innerHTML = '';
+
+  const bodyEl = document.getElementById('article-body');
+  if (bodyEl) {
+    bodyEl.innerHTML = `
+      <div style="text-align: center; padding: 3rem 1rem;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #b91c1c; margin-bottom: 1rem;">${escapeHtml(title)}</h3>
         <p style="color: #64748b; margin-bottom: 2rem;">${escapeHtml(msg)}</p>
-        <a href="/blog" class="btn-new-post" style="padding: 0.6rem 1.2rem;">Back to DEKUTCONNECT Post</a>
+        <a href="/blog" class="btn-new-post" style="padding: 0.6rem 1.2rem;">Return to DEKUTCONNECT Front Page</a>
       </div>
     `;
   }

@@ -22,15 +22,27 @@ class LegalComplianceSuite {
       phone: "+254 (061) 2050000"
     };
 
-    // Auto-initialize protections
-    this.enforceWiretappingProtection();
-    this.auditSelfHostedFonts();
-    this.initPrivacyConsentBanner();
+    // Auto-initialize protections safely
+    try {
+      this.enforceWiretappingProtection();
+      this.auditSelfHostedFonts();
+      this.initPrivacyConsentBanner();
+    } catch (e) {
+      console.warn('[LEGAL] Compliance init note:', e.message);
+    }
+  }
+
+  _safeGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+
+  _safeSet(key, val) {
+    try { localStorage.setItem(key, val); } catch (e) {}
   }
 
   // 1. COPPA Age Gate Verification
   isAgeVerified() {
-    return localStorage.getItem(this.AGE_GATE_KEY) === 'true';
+    return this._safeGet(this.AGE_GATE_KEY) === 'true';
   }
 
   requestAgeVerification(callback) {
@@ -122,7 +134,12 @@ class LegalComplianceSuite {
 
   // Privacy Consent Banner (Opt-in only)
   initPrivacyConsentBanner() {
-    if (localStorage.getItem(this.COOKIE_CONSENT_KEY)) return;
+    if (this._safeGet(this.COOKIE_CONSENT_KEY)) return;
+
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', () => this.initPrivacyConsentBanner());
+      return;
+    }
 
     const banner = document.createElement('div');
     banner.id = 'california-privacy-banner';
@@ -157,12 +174,16 @@ class LegalComplianceSuite {
         </button>
       </div>
     `;
-    document.body.appendChild(banner);
-
-    document.getElementById('accept-privacy-btn').addEventListener('click', () => {
-      localStorage.setItem(this.COOKIE_CONSENT_KEY, 'acknowledged');
-      banner.remove();
-    });
+    try {
+      document.body.appendChild(banner);
+      const btn = document.getElementById('accept-privacy-btn');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          this._safeSet(this.COOKIE_CONSENT_KEY, 'acknowledged');
+          banner.remove();
+        });
+      }
+    } catch (e) {}
   }
 
   // 4. CAN-SPAM Compliant Newsletter Subscription
@@ -198,4 +219,12 @@ class LegalComplianceSuite {
   }
 }
 
-window.LegalSuite = new LegalComplianceSuite();
+try {
+  window.LegalSuite = new LegalComplianceSuite();
+} catch (e) {
+  console.warn('[LEGAL] Error initializing LegalComplianceSuite:', e.message);
+  window.LegalSuite = {
+    isAgeVerified: () => true,
+    requestAgeVerification: (cb) => cb && cb(true)
+  };
+}
