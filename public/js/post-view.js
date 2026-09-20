@@ -4,7 +4,7 @@
  * Li-Deheng Rating Component, and Social Sharing
  */
 
-const CREST_IMAGE_URL = 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg';
+var CREST_IMAGE_URL = window.CREST_IMAGE_URL || 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg';
 
 function resolveMediaUrl(url) {
   if (!url) return CREST_IMAGE_URL;
@@ -39,12 +39,16 @@ async function initPostView() {
     }
   }
 
+  // Parse slug from ?slug= query param or directly from path (/blog/movie or /blog/movie.html)
   const params = new URLSearchParams(window.location.search);
   let slug = params.get('slug');
   if (!slug) {
     const parts = window.location.pathname.split('/').filter(Boolean);
-    if (parts.length >= 2 && (parts[0] === 'blog' || parts[0] === 'dekutconnect')) {
-      slug = parts[parts.length - 1].replace(/\.html$/, '');
+    if (parts.length >= 1) {
+      const lastPart = parts[parts.length - 1].replace(/\.html$/, '');
+      if (lastPart && lastPart !== 'blog' && lastPart !== 'index' && lastPart !== 'post' && lastPart !== 'editor' && lastPart !== 'dmca') {
+        slug = lastPart;
+      }
     }
   }
 

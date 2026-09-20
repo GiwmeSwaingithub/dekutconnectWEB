@@ -81,38 +81,20 @@ def build():
                 f.write(fixed_content)
             print(f"Processed {hf} -> blog/{hf}")
 
-    # Generate smart 404.html fallback
-    smart_404_content = """<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>DEKUTCONNECT Post — Loading Article...</title>
-  <script>
-    (function() {
-      var path = window.location.pathname;
-      var parts = path.split('/').filter(Boolean);
-      
-      if (parts.length >= 1) {
-        var slug = parts[parts.length - 1].replace(/\\.html$/, '');
-        if (slug && slug !== 'blog' && slug !== 'index' && slug !== 'editor' && slug !== 'dmca') {
-          window.location.replace('/blog/post.html?slug=' + encodeURIComponent(slug));
-          return;
-        }
-      }
-      window.location.replace('/blog');
-    })();
-  </script>
-</head>
-<body>
-  <p>Redirecting to DEKUTCONNECT Post...</p>
-</body>
-</html>
-"""
+    # Generate smart 404.html SPA renderer (serves post.html directly while preserving clean URL without .html)
+    post_html_file = os.path.join(PUBLIC_DIR, 'post.html')
+    if os.path.exists(post_html_file):
+        with open(post_html_file, 'r', encoding='utf-8') as f:
+            post_content = f.read()
+        smart_404_content = fix_html_asset_paths(post_content)
+    else:
+        smart_404_content = "404 Not Found"
+
     with open(os.path.join(REPO_DIR, '404.html'), 'w', encoding='utf-8') as f:
         f.write(smart_404_content)
     with open(os.path.join(BLOG_DIR, '404.html'), 'w', encoding='utf-8') as f:
         f.write(smart_404_content)
-    print("Created 404.html SPA fallback pages.")
+    print("Created 404.html SPA fallback pages (clean URLs without .html).")
     print("=== Build Complete: All post metadata managed live via Firebase Firestore ===")
 
 if __name__ == '__main__':

@@ -15,7 +15,8 @@
 // ─── Firebase SDK (compat mode — works without bundler) ──────────────────────
 // Loaded via <script> tags in HTML before this file. See firebase-sdk-loader comment.
 
-const CREST_IMAGE_URL = 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg';
+var CREST_IMAGE_URL = window.CREST_IMAGE_URL || 'https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg';
+window.CREST_IMAGE_URL = CREST_IMAGE_URL;
 
 // ─── Firebase Config ──────────────────────────────────────────────────────────
 const firebaseConfig = {
