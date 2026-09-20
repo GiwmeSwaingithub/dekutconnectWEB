@@ -6,14 +6,19 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   const loaderOverlay = document.getElementById('loader-overlay');
+  const maxLoaderTimeout = setTimeout(() => {
+    if (loaderOverlay) loaderOverlay.classList.add('hidden');
+  }, 1000);
+
   try {
     const posts = await window.DKDB.getAllPosts();
     renderBlogIndex(posts);
   } catch (err) {
     console.error('Error initializing blog index:', err);
   } finally {
+    clearTimeout(maxLoaderTimeout);
     if (loaderOverlay) {
-      setTimeout(() => loaderOverlay.classList.add('hidden'), 200);
+      loaderOverlay.classList.add('hidden');
     }
   }
 

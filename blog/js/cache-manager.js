@@ -151,6 +151,15 @@ window.DKCache = new HighScaleCache();
     if (!img || img.dataset.shimmerInit) return;
     img.dataset.shimmerInit = 'true';
 
+    // Skip small icons, header crests, avatars, and logo images
+    if (img.classList.contains('masthead-crest') ||
+        img.classList.contains('consent-logo') ||
+        img.classList.contains('author-avatar') ||
+        img.getAttribute('width') <= 64 ||
+        img.getAttribute('height') <= 64) {
+      return;
+    }
+
     // If already completely loaded, skip shimmer
     if (img.complete && img.naturalWidth > 0) {
       img.classList.remove('img-shimmer');
