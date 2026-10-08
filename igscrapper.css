@@ -1,0 +1,89 @@
+.ig-stats {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    max-width: 300px;
+    background: #1a1a1a; /* Dark background instead of white */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3); /* Darker shadow for contrast */
+    margin: 10px auto;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    border: 1px solid #333; /* Subtle border */
+    color: #ffffff; /* White text for dark background */
+}
+.ig-stats:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+}
+.ig-header {
+    background: linear-gradient(45deg, #405DE6, #833AB4, #E1306C);
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+.ig-logo { font-size: 1.2rem; margin-right: 8px; }
+.ig-title { font-size: 0.9rem; font-weight: 600; margin: 0; }
+.ig-content { padding: 15px; }
+.ig-username { 
+    font-size: 1.1rem; 
+    font-weight: 600; 
+    margin-bottom: 12px; 
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff; /* Ensure white text */
+}
+.ig-verified { color: #0095f6; margin-left: 4px; font-size: 0.8rem; } /* Instagram blue */
+.ig-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px; 
+}
+.ig-stat { 
+    text-align: center; 
+    padding: 12px 5px; 
+    border-radius: 8px; 
+    background: rgba(255, 255, 255, 0.05); /* Light overlay on dark */
+    border: 1px solid #333;
+    transition: background 0.2s ease;
+}
+.ig-stat:hover {
+    background: rgba(255, 255, 255, 0.1); /* Slightly brighter on hover */
+}
+.ig-value { 
+    font-size: 1rem; 
+    font-weight: 700; 
+    margin-bottom: 2px; 
+    color: #ffffff; /* White numbers */
+}
+.ig-label { 
+    font-size: 0.7rem; 
+    color: #a8a8a8; /* Light gray for labels */
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+}
+.ig-loading { 
+    text-align: center; 
+    padding: 20px; 
+    color: #a8a8a8; /* Light gray for loading text */
+}
+.ig-spinner { 
+    border: 2px solid rgba(255, 255, 255, 0.1); 
+    border-left-color: #0095f6; /* Instagram blue */
+    border-radius: 50%; 
+    width: 20px; 
+    height: 20px; 
+    animation: spin 1s linear infinite; 
+    margin: 0 auto 8px; 
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ig-error { 
+    text-align: center; 
+    padding: 15px; 
+    color: #ed4956; /* Instagram error red */
+    background: rgba(237, 73, 86, 0.1); 
+    border-radius: 6px; 
+    font-size: 0.8rem; 
+    border: 1px solid rgba(237, 73, 86, 0.2);
+}

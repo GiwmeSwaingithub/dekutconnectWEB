@@ -1,0 +1,10 @@
+# robots.txt for DEKUTCONNECT
+
+User-agent: *
+Disallow:
+
+# Explicitly allow everything
+Allow: /
+
+# Sitemap for better indexing
+Sitemap: https://dekutconnect-official.web.app/sitemap.xml

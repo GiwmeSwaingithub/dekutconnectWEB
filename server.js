@@ -201,7 +201,7 @@ app.get('/', (req, res) => {
 
 // The Post & Newsroom (Editorial Blog)
 app.get(['/blog', '/blog/'], (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+  res.sendFile(path.join(PUBLIC_DIR, 'blog.html'));
 });
 
 // Brand Partnerships Directory

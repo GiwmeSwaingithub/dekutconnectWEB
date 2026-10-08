@@ -1,0 +1,200 @@
+/* 🔧 Base reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #12493b, #064d03, #fdbb2d);
+  color: #fff;
+  min-height: 100vh;
+  padding-bottom: 60px; /* adjusted for thinner footer */
+}
+
+/* 🔝 Slim Header */
+header {
+  text-align: center;
+  padding: 10px 12px; /* thinner */
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+h1 {
+  font-size: 1em;
+  color: #ffd700;
+  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+.subtitle {
+  font-size: 0.8em;
+  opacity: 0.85;
+}
+
+/* 🧱 Main Layout */
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 15px;
+}
+
+/* ⚠️ Disclaimer */
+.disclaimer {
+  background: rgba(255, 0, 0, 0.2);
+  border: 1px solid rgba(255, 100, 100, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 20px;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.disclaimer h2 {
+  color: #ffcccc;
+  margin-bottom: 5px;
+  font-size: 1em;
+}
+
+.disclaimer p {
+  font-size: 0.8em;
+  line-height: 1.3;
+}
+
+/* 🏛️ Institution Section */
+.institution-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.institution-name {
+  font-size: 1.1em;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vote-btn {
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+  border-radius: 18px;
+  color: #fff;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.vote-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 176, 155, 0.4);
+}
+
+/* 👥 Delegate Cards */
+.delegates-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.delegate-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.delegate-photo {
+  height: 220px;
+  background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delegate-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.delegate-info {
+  padding: 10px;
+}
+
+.delegate-name {
+  font-weight: bold;
+  font-size: 1em;
+  color: #ffd700;
+}
+
+.reg-number {
+  font-size: 0.8em;
+  color: #a0d2ff;
+  margin-bottom: 6px;
+}
+
+/* 📩 Footer — slimmed down */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.contact-admin {
+  padding: 6px 12px;
+  font-size: 0.75em;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+.word-carousel {
+  display: flex;
+  gap: 6px;
+}
+
+.word-tag {
+  padding: 4px 10px;
+  font-size: 0.75em;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.word-tag:hover {
+  transform: translateY(-1px);
+}
+
+/* 📱 Responsive Grid */
+@media (min-width: 768px) {
+  .delegates-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}

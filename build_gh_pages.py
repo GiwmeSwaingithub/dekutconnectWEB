@@ -66,15 +66,26 @@ def build():
             shutil.copytree(src_path, dst_root_path)
             print(f"Copied {sub} -> blog/{sub} & {sub}")
 
-    # Copy partnership, go, and oraimo folders to root
-    for folder in ['partnership', 'go', 'oraimo']:
+    # Copy partnership, go, oraimo, and dekut_trending-archieve folders to root
+    for folder in ['partnership', 'go', 'oraimo', 'dekut_trending-archieve', 'CLUBS']:
         src_folder = os.path.join(PUBLIC_DIR, folder)
         dst_folder = os.path.join(REPO_DIR, folder)
         if os.path.exists(src_folder):
-            if os.path.exists(dst_folder):
-                shutil.rmtree(dst_folder)
-            shutil.copytree(src_folder, dst_folder)
-            print(f"Copied {folder} -> {folder}/")
+            if os.path.isdir(src_folder):
+                if os.path.exists(dst_folder):
+                    shutil.rmtree(dst_folder)
+                shutil.copytree(src_folder, dst_folder)
+                print(f"Copied folder {folder} -> {folder}/")
+            else:
+                shutil.copy(src_folder, dst_folder)
+                print(f"Copied file {folder} -> {folder}")
+
+    # Copy root assets (scripts, styles, html files) from public to REPO_DIR
+    for item in os.listdir(PUBLIC_DIR):
+        src_item = os.path.join(PUBLIC_DIR, item)
+        dst_item = os.path.join(REPO_DIR, item)
+        if os.path.isfile(src_item) and (item.endswith('.css') or item.endswith('.js') or item.endswith('.html') or item.endswith('.txt')):
+            shutil.copy(src_item, dst_item)
 
     # Copy posts.json
     shutil.copy(POSTS_FILE, os.path.join(BLOG_DIR, 'posts.json'))
@@ -82,13 +93,22 @@ def build():
     print("Copied posts.json -> blog/posts.json")
 
     # Root index.html should be the main portal homepage (connect.dekut.site)
-    home_html_file = os.path.join(PUBLIC_DIR, 'home.html')
+    home_html_file = os.path.join(PUBLIC_DIR, 'index.html')
     if os.path.exists(home_html_file):
         shutil.copy(home_html_file, os.path.join(REPO_DIR, 'index.html'))
-        print("Copied home.html -> index.html (Root Portal)")
+        print("Copied index.html -> index.html (Root Portal)")
 
     # Process and write blog HTML templates (into blog/)
-    html_files = ['index.html', 'editor.html', 'dmca.html', 'legal-audit.html', 'post.html', 'manifest.json']
+    blog_index_src = os.path.join(PUBLIC_DIR, 'blog.html')
+    if os.path.exists(blog_index_src):
+        with open(blog_index_src, 'r', encoding='utf-8') as f:
+            content = f.read()
+        fixed_content = fix_html_asset_paths(content)
+        with open(os.path.join(BLOG_DIR, 'index.html'), 'w', encoding='utf-8') as f:
+            f.write(fixed_content)
+        print("Processed blog.html -> blog/index.html")
+
+    html_files = ['editor.html', 'dmca.html', 'legal-audit.html', 'post.html', 'manifest.json']
     for hf in html_files:
         src_file = os.path.join(PUBLIC_DIR, hf)
         if os.path.exists(src_file):

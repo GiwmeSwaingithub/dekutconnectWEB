@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5" />
+  <meta name="description" content="DEKUT Uni Resource Centre — combined eLearning, notes, class links, events, and more." />
+  <title>DEKUT Uni Resource Centre</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+
+  <title>DEKUTCONNECT - Dedan Kimathi University Entertainment | Campus News, Memes & Events</title>
+  <meta name="description" content="DEKUTCONNECT: Dedan Kimathi University's #1 entertainment hub. Campus memes, events, news, WhatsApp groups, student life in Nyeri. Join 32K+ DeKUT students." />
+  <meta name="keywords" content="Dedan Kimathi University, DeKUT, DEKUTCONNECT, campus entertainment, student life Nyeri,dedan kimathi student portal,dekut connect,dekut elearning portal,dekut trending,dc,dekut_trending,dekut_connect,dekut juice, university memes, campus news Kenya, student events, WhatsApp groups campus" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow" />
+  <meta name="geo.region" content="KE-NY" />
+  <meta name="geo.placename" content="Nyeri" />
+  <meta name="geo.position" content="-0.4167;36.9500" />
+  <meta name="ICBM" content="-0.4167, 36.9500" />
+  <meta name="author" content="DEKUTCONNECT" />
+  <meta name="theme-color" content="#0b9b6b" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://dekutconnect-official.web.app/" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://play-lh.googleusercontent.com/FFvqQ7X7CMyVaaKjFi2aYbowTjsLZUIUprQxX1li8fBe6m9XpHPiTDq_3mhzRZJxbg=w240-h480" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="DEKUTCONNECT - Dedan Kimathi University's Entertainment Hub" />
+  <meta property="og:description" content="Your #1 source for Dedan Kimathi University entertainment." />
+  <meta property="og:image" content="https://play-lh.googleusercontent.com/FFvqQ7X7CMyVaaKjFi2aYbowTjsLZUIUprQxX1li8fBe6m9XpHPiTDq_3mhzRZJxbg=w240-h480" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="DEKUTCONNECT - Dedan Kimathi University Entertainment" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:title" content="DEKUTCONNECT - Where DeKUT Vibes Live" />
+  <meta name="twitter:description" content="Campus entertainment hub for Dedan Kimathi University." />
+  <meta name="twitter:image" content="https://play-lh.googleusercontent.com/FFvqQ7X7CMyVaaKjFi2aYbowTjsLZUIUprQxX1li8fBe6m9XpHPiTDq_3mhzRZJxbg=w240-h480" />
+
+  <!-- Schema.org (Organization) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "DEKUTCONNECT",
+    "alternateName": "Dedan Kimathi University Entertainment Hub",
+    "url": "https://dekutconnect-official.web.app",
+    "logo": "https://play-lh.googleusercontent.com/FFvqQ7X7CMyVaaKjFi2aYbowTjsLZUIUprQxX1li8fBe6m9XpHPiTDq_3mhzRZJxbg=w240-h480",
+    "description": "DEKUTCONNECT is the premier entertainment and social hub for Dedan Kimathi University of Technology students",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Nyeri",
+      "addressRegion": "Central",
+      "addressCountry": "KE"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "dekutconnect@gmail.com",
+      "contactType": "customer service"
+    },
+    "sameAs": [
+      "https://www.instagram.com/dekutconnect",
+      "https://www.tiktok.com/@dekutconnect.official",
+      "https://www.youtube.com/@DEKUTCONNECT",
+      "https://www.facebook.com/share/1BQzioTvPc/",
+      "https://twitter.com/dekutconnect",
+      "https://ngl.link/dkutconnect",
+      "https://wa.me/254769486775",
+      "https://twet.link/dekutconnect",
+      "https://t.me/dekutconnect"
+    ]
+  }
+  </script>
+
+  <!-- Schema.org (Website) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://dekutconnect-official.web.app",
+    "name": "DEKUTCONNECT",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://dekutconnect-official.web.app/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <!-- Preload then apply stylesheet -->
+  <link rel="preload" href="stylesdkutappresource-min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="stylesdkutappresource-min.css"></noscript>
+  <link rel="stylesheet" href="https://giwmeswaingithub.github.io/dekutconnect/stylesdkutappresource-min.css">
+<style>
+  .talk-admin-btn {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  background-color: #1d4ed8; /* Blue */
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 9999;
+}
+
+.talk-admin-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+
+</style>
+     <!-- Google Tag Manager -->
+  <script>
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5DTQTZSM');
+  </script>
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6QZTYG7YQW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-6QZTYG7YQW');
+  </script>
+
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '2158090784711774');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=2158090784711774&ev=PageView&noscript=1" />
+  </noscript>
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)}
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "s3pv8acy5p");
+  </script>
+</head>
+<!-- Talk to Admin Bottom Button -->
+<a href="https://tinyurl.com/dekutconnect-admin" target="_blank" class="talk-admin-btn">💬 Talk to Admin</a>
+
+<body>
+  <header>
+    <div class="header-content">
+      <div class="brand">
+        <div class="logo">
+          <img src="https://play-lh.googleusercontent.com/FFvqQ7X7CMyVaaKjFi2aYbowTjsLZUIUprQxX1li8fBe6m9XpHPiTDq_3mhzRZJxbg=w240-h480" alt="DKUT" />
+        </div>
+        <div class="brand-text">
+          <h1>DKUT Resource Centre</h1>
+          <p>Unified academic hub</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button class="menu-btn" id="menuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Search -->
+    <div class="search-section">
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search courses, materials, resources..." />
+        <button id="searchBtn">🔍</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="tabsContainer">
+      <button class="tab active" data-tab="schools">Schools</button>
+      <button class="tab" data-tab="resources">Resources</button>
+      <button class="tab" data-tab="elearning">MORE...</button>
+    </div>
+
+    <!-- Schools Section -->
+    <div class="section" id="schoolsSection">
+      <div class="section-header">
+        <h2>Schools & Institutes</h2>
+      </div>
+      <div class="grid" id="schoolsGrid"></div>
+    </div>
+
+    <!-- Resources Section -->
+    <div class="section" id="resourcesSection" style="display: none;">
+      <div class="section-header">
+        <h2>Resource Library</h2>
+      </div>
+      <div class="resource-filters" id="resourceFilters">
+        <button class="filter-btn active" data-type="all">All</button>
+        <button class="filter-btn" data-type="notes">📝 Notes</button>
+        <button class="filter-btn" data-type="slides">📊 Slides</button>
+        <button class="filter-btn" data-type="past-papers">📄 Past Papers</button>
+        <button class="filter-btn" data-type="books">📚 Books</button>
+        <button class="filter-btn" data-type="other">📎 Other</button>
+      </div>
+      <div class="resource-list" id="resourcesList"></div>
+      <div class="load-more" id="resourcesLoadMore" style="display: none;">
+        <button class="btn btn-outline" id="loadMoreResourcesBtn">Load More</button>
+      </div>
+    </div>
+
+    <!-- Course Resources Section -->
+    <div class="section" id="courseResourcesSection" style="display: none;">
+      <a class="back-btn" id="backToResourcesBtn">← Back to Resources</a>
+      <div class="section-header">
+        <h2 id="courseResourcesTitle">Course Resources</h2>
+      </div>
+      <div class="resource-filters" id="courseResourceFilters">
+        <button class="filter-btn active" data-type="all">All</button>
+        <button class="filter-btn" data-type="notes">📝 Notes</button>
+        <button class="filter-btn" data-type="slides">📊 Slides</button>
+        <button class="filter-btn" data-type="past-papers">📄 Past Papers</button>
+        <button class="filter-btn" data-type="books">📚 Books</button>
+        <button class="filter-btn" data-type="other">📎 Other</button>
+      </div>
+      <div class="resource-list" id="courseResourcesList"></div>
+      <div class="load-more" id="courseResourcesLoadMore" style="display: none;">
+        <button class="btn btn-outline" id="loadMoreCourseResourcesBtn">Load More</button>
+      </div>
+    </div>
+
+    <!-- E-Learning Section -->
+    <div class="section" id="elearningSection" style="display: none;">
+      <div class="section-header">
+        <h2>E-Learning Platforms</h2>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>DEKUT E-Learning</h3>
+          <p>Access course materials, assignments, and instructor resources</p>
+          <div style="margin-top: 12px;">
+            <a href="https://elearning.dkut.ac.ke" target="_blank" class="btn btn-small">Open Portal</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Digital Library</h3>
+          <p>E-books, journals, research papers and academic databases</p>
+          <div style="margin-top: 12px;">
+            <a href="https://library.dkut.ac.ke" target="_blank" class="btn btn-small">Browse</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Plagiarism Checker</h3>
+          <p>Check your work for plagiarism using Grammarly</p>
+          <div style="margin-top: 12px;">
+            <a href="https://www.grammarly.com/plagiarism-checker" target="_blank" class="btn btn-small">Check Now</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Google Scholar</h3>
+          <p>Access academic papers and research materials</p>
+          <div style="margin-top: 12px;">
+            <a href="https://scholar.google.com" target="_blank" class="btn btn-small">Search</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>ResearchGate</h3>
+          <p>Connect with researchers and access publications</p>
+          <div style="margin-top: 12px;">
+            <a href="https://www.researchgate.net" target="_blank" class="btn btn-small">Explore</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Khan Academy</h3>
+          <p>Free online courses and learning resources</p>
+          <div style="margin-top: 12px;">
+            <a href="https://www.khanacademy.org" target="_blank" class="btn btn-small">Learn</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2025 DEKUT Resource Centre • Made with ❤️ for students</p>
+    </footer>
+  </div>
+
+  <!-- Quick Add Button -->
+  <button class="quick-add-btn" id="quickAddBtn" title="Add Resource">+</button>
+
+  <!-- Add Resource Modal -->
+  <div class="modal" id="addModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Resource</h2>
+        <button class="close-btn" id="closeModalBtn">×</button>
+      </div>
+      
+      <form id="addResourceForm">
+        <div class="form-group">
+          <label>Resource Title *</label>
+          <input type="text" id="resourceTitle" placeholder="e.g., Data Structures Notes" required />
+        </div>
+        
+        <div class="form-group">
+          <label>Type *</label>
+          <select id="resourceType" required>
+            <option value="">Select type</option>
+            <option value="notes">📝 Notes</option>
+            <option value="slides">📊 Slides</option>
+            <option value="past-papers">📄 Past Papers</option>
+            <option value="books">📚 Books</option>
+            <option value="other">📎 Other</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>School *</label>
+          <select id="resourceSchool" required>
+            <option value="">Select school</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Program *</label>
+          <select id="resourceProgram" required>
+            <option value="">Select program first</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Course/Unit *</label>
+          <input type="text" id="resourceCourse" placeholder="e.g., Computer Science 101" required />
+        </div>
+        
+        <div class="form-group">
+          <label>Unit Code</label>
+          <input type="text" id="resourceCode" placeholder="e.g., CS101" />
+        </div>
+        
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="resourceDescription" placeholder="Brief description of the resource..."></textarea>
+        </div>
+        
+        <!-- File Upload Area -->
+        <div class="upload-area" id="drop-area">
+          <div class="upload-icon">📁</div>
+          <p>Drag & drop files here or click to browse</p>
+          <input type="file" id="file-input" class="file-input" />
+          <div class="file-info" id="file-info"></div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="upload-progress" id="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-bar"></div>
+          </div>
+          <div class="progress-text" id="progress-text">0%</div>
+        </div>
+        
+        <button type="submit" class="btn" style="width: 100%;" id="submitBtn">
+          Add Resource
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- School Details Modal -->
+  <div class="modal" id="schoolModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="schoolModalTitle">School Programs</h2>
+        <button class="close-btn" id="closeSchoolModalBtn">×</button>
+      </div>
+      <div id="schoolModalContent"></div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div id="notification" class="notification"></div>
+
+<script src="https://giwmeswaingithub.github.io/dekutconnect/scriptdkutappresource-min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/gh/GiwmeSwaingithub/my-js-lib@latest/security.js"></script>
+</body>
+</html>
+

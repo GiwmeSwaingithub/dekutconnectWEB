@@ -1,202 +1,899 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- Favicon & Touch Icon -->
-  <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
-  <link rel="apple-touch-icon" href="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Primary SEO Meta Tags -->
-  <title>DEKUTCONNECT — The Official Digital Ecosystem of Dedan Kimathi University</title>
-  <meta name="description" content="Welcome to DEKUTCONNECT. The central portal for Dedan Kimathi University of Technology — featuring The Post newsroom, official brand partnerships, student perks, and tech innovation.">
-  <meta name="keywords" content="DEKUTCONNECT, DeKUT, Dedan Kimathi University, Nyeri Kenya, student perks, Oraimo discount, university portal">
-  <link rel="canonical" href="https://connect.dekut.site">
+  <title>DEKUTCONNECT - Dedan Kimathi University Entertainment | Campus News, Memes & Events</title>
+  <meta name="description" content="DEKUTCONNECT: Dedan Kimathi University's #1 entertainment hub. Campus memes, events, news, WhatsApp groups, student life in Nyeri. Join 32K+ DeKUT students." />
+  <meta name="keywords" content="Dedan Kimathi University, DeKUT, DEKUTCONNECT, campus entertainment, student life Nyeri,dedan kimathi student portal,dekut connect,dekut elearning portal,dekut trending,dc,dekut_trending,dekut_connect,dekut juice, university memes, campus news Kenya, student events, WhatsApp groups campus" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow" />
+  <meta name="geo.region" content="KE-NY" />
+  <meta name="geo.placename" content="Nyeri" />
+  <meta name="geo.position" content="-0.4167;36.9500" />
+  <meta name="ICBM" content="-0.4167, 36.9500" />
+  <meta name="author" content="DEKUTCONNECT" />
+  <meta name="theme-color" content="#0b9b6b" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://connect.dekut.site" />
+
+  <!-- Preconnect for fast loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.instagram.com">
+  <link rel="preconnect" href="https://connect.facebook.net">
+  <link rel="preconnect" href="https://www.youtube.com">
+  <link rel="preconnect" href="https://maps.googleapis.com">
+  <link rel="preconnect" href="https://media.link.me">
+
+  <!-- Preload critical fonts/images -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" as="style">
+  <link rel="preload" href="https://media.link.me/cdn-cgi/image/width=160,height=160,quality=90,format=webp/images/style/icons/v5.0/TikTok-2.png" as="image">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/CxN0RKcD/dekutconnectdp.jpg" />
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://connect.dekut.site">
-  <meta property="og:title" content="DEKUTCONNECT — Campus News, Brand Partnerships & Student Perks">
-  <meta property="og:description" content="The central pulse of Dedan Kimathi University of Technology. Explore editorial stories, Oraimo partnership perks, and tech showcases.">
-  <meta property="og:image" content="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
+  <meta property="og:title" content="DEKUTCONNECT - Dedan Kimathi University's Entertainment Hub" />
+  <meta property="og:description" content="Your #1 source for Dedan Kimathi University entertainment." />
+  <meta property="og:image" content="https://i.postimg.cc/CxN0RKcD/dekutconnectdp.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="DEKUTCONNECT - Dedan Kimathi University Entertainment" />
 
-  <!-- Twitter / X -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://connect.dekut.site">
-  <meta name="twitter:title" content="DEKUTCONNECT Portal">
-  <meta name="twitter:description" content="Connecting Dedan Kimathi University of Technology with news, verified brand partnerships, and student rewards.">
-  <meta name="twitter:image" content="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg">
+  <!-- Twitter Card -->
+  <meta name="twitter:title" content="DEKUTCONNECT - Where DeKUT Vibes Live" />
+  <meta name="twitter:description" content="Campus entertainment hub for Dedan Kimathi University." />
+  <meta name="twitter:image" content="https://i.postimg.cc/CxN0RKcD/dekutconnectdp.jpg" />
 
-  <link rel="stylesheet" href="/css/partnership.css">
+  <!-- Schema.org (Organization) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "DEKUTCONNECT",
+    "alternateName": "Dedan Kimathi University Entertainment Hub",
+    "url": "https://connect.dekut.site",
+    "logo": "https://i.postimg.cc/CxN0RKcD/dekutconnectdp.jpg",
+    "description": "DEKUTCONNECT is the premier entertainment and social hub for Dedan Kimathi University of Technology students",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Nyeri",
+      "addressRegion": "Central",
+      "addressCountry": "KE"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "dekutconnect@gmail.com",
+      "contactType": "customer service"
+    },
+    "sameAs": [
+      "https://www.instagram.com/dekutconnect",
+      "https://www.tiktok.com/@dekutconnect.official",
+      "https://www.youtube.com/@DEKUTCONNECT",
+      "https://www.facebook.com/share/1BQzioTvPc/",
+      "https://twitter.com/dekutconnect",
+      "https://ngl.link/dkutconnect",
+      "https://wa.me/254769486775",
+      "https://twet.link/dekutconnect",
+      "https://t.me/dekutconnect"
+    ]
+  }
+  </script>
+
+  <!-- Schema.org (Website) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://connect.dekut.site",
+    "name": "DEKUTCONNECT",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://connect.dekut.site/blog?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- Preload then apply stylesheet -->
+  <link rel="preload" href="/styles-min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles-min.css"></noscript>
+  <link rel="stylesheet" href="/styles-min.css">
+
+  <link rel="preload" href="/styles2-min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles2-min.css"></noscript>
+  <link rel="stylesheet" href="/styles2-min.css">
+
+  <link rel="preload" href="/igscrapper.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/igscrapper.css"></noscript>
+  <link rel="stylesheet" href="/igscrapper.css">
+  
+  <!-- Lazy-load Embeds Scripts -->
+  <script async src="https://www.instagram.com/embed.js"></script>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"></script>
 </head>
-<body class="portal-body">
 
-  <!-- Navigation Bar -->
-  <nav class="portal-nav">
-    <div class="portal-container portal-nav-inner">
-      <a href="/" class="portal-brand">
-        <img class="portal-brand-logo" src="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg" alt="DEKUTCONNECT Emblem">
-        <div class="portal-brand-text">
-          <span class="portal-brand-title">DEKUTCONNECT</span>
-          <span class="portal-brand-tagline">University Hub</span>
-        </div>
-      </a>
-      <ul class="portal-nav-links">
-        <li><a href="/" class="active">Home</a></li>
-        <li><a href="/blog">News & Blog</a></li>
-        <li><a href="/partnership">Partnerships</a></li>
-        <li><a href="/partnership/oraimo" class="portal-nav-cta">🎁 Oraimo Perks</a></li>
-      </ul>
+<body>
+<!-- Informative Follow Us Top/Bottom Banner (Instagram & WhatsApp Channel) -->
+<div class="app-install-banner hidden" id="appInstallBanner">
+  <div class="banner-content">
+    <div class="banner-icon" style="display:flex; align-items:center; gap:4px; font-size:20px;">
+      <i class="fab fa-whatsapp" style="color:#25D366;"></i>
+      <i class="fab fa-instagram" style="color:#E1306C;"></i>
     </div>
-  </nav>
+    <div class="banner-text">
+      <h4>Stay in the DeKUT Loop! 🚀</h4>
+      <p>Follow our Instagram & Join 32K+ Students on WhatsApp Channel for breaking campus updates & memes.</p>
+    </div>
+  </div>
+  <div class="banner-actions" style="display:flex; align-items:center; gap:8px;">
+    <button class="banner-btn" style="background:#25D366; color:#051014; font-weight:700;" onclick="window.open('https://www.whatsapp.com/channel/0029VbAb8L46WaKx34k8vU0S', '_blank')"><i class="fab fa-whatsapp"></i> Channel</button>
+    <button class="banner-btn" style="background:linear-gradient(45deg, #f09433, #dc2743, #bc1888); color:#fff; font-weight:700;" onclick="window.open('https://instagram.com/dekutconnect', '_blank')"><i class="fab fa-instagram"></i> Follow</button>
+    <button class="banner-close" id="bannerCloseBtn">×</button>
+  </div>
+</div>
 
-  <main class="portal-container">
-    
-    <!-- Hero Section -->
-    <section class="portal-hero">
-      <div class="hero-badge">
-        <span>⚡ The Central Digital Pulse of DeKUT</span>
+<!-- Informative Follow Us Popup Modal -->
+<div class="app-install-popup" id="appInstallPopup" style="max-width: 360px; width: 92%;">
+  <div class="popup-header">
+    <div class="popup-icon" style="background: rgba(16, 185, 129, 0.15); border-radius: 12px; padding: 6px; display: flex; align-items: center; justify-content: center;">
+      <img src="https://i.postimg.cc/CxN0RKcD/dekutconnectdp.jpg" 
+           alt="DEKUTCONNECT Logo" width="44" height="44" style="border-radius:10px; object-fit:cover;" />
+    </div>
+    <div class="popup-title">
+      <h4>Join 32,000+ DeKUT Students! 🔥</h4>
+      <p>Official Instagram & WhatsApp Channels</p>
+    </div>
+    <button class="popup-close" id="popupCloseBtn">×</button>
+  </div>
+  
+  <div style="padding: 10px 0 14px; font-size: 0.88rem; line-height: 1.5; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 14px;">
+    <p style="margin: 0 0 8px; font-weight: 700; color: #34d399;">Why join our official channels?</p>
+    <ul style="margin: 0 0 0 16px; padding: 0; font-size: 0.82rem; color: #94a3b8; display: flex; flex-direction: column; gap: 4px;">
+      <li>⚡ <strong>WhatsApp Channel:</strong> Real-time exam notices, fee deadlines, HELB updates & breaking stories.</li>
+      <li>📸 <strong>Instagram:</strong> Campus culture, student memes, event coverage & spotlights.</li>
+      <li>🎁 <strong>Student Rewards:</strong> Exclusive brand deals like Oraimo 200 points & 5% coupon codes!</li>
+    </ul>
+  </div>
+
+  <div class="popup-actions" style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; gap: 8px;">
+      <button class="popup-btn" style="flex: 1; background: #25D366; color: #051014; font-weight: 700; border: none; border-radius: 8px; padding: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.open('https://www.whatsapp.com/channel/0029VbAb8L46WaKx34k8vU0S', '_blank'); closePopup();">
+        <i class="fab fa-whatsapp" style="font-size: 16px;"></i> Channel
+      </button>
+      <button class="popup-btn" style="flex: 1; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; font-weight: 700; border: none; border-radius: 8px; padding: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.open('https://instagram.com/dekutconnect', '_blank'); closePopup();">
+        <i class="fab fa-instagram" style="font-size: 16px;"></i> Follow IG
+      </button>
+    </div>
+    <button class="popup-btn secondary" id="popupLaterBtn" style="border-radius: 8px; padding: 8px; font-size: 0.8rem; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;" onclick="closePopup();">
+      Already Following / Remind Me Later
+    </button>
+  </div>
+</div>
+
+
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">
+          <img 
+            src="https://i.postimg.cc/CxN0RKcD/dekutconnectdp.jpg" 
+            alt="DEKUTCONNECT Logo"
+            class="logo-img"
+          />
+        </div>
+        <div class="title">
+          <h1>
+            DEKUTCONNECT
+            <img class="verifyicon" src="https://link.me/dummy/verify/default.svg" alt="Verified">
+          </h1>
+          <p>
+            <a href="https://www.dkut.ac.ke" target="_blank" rel="noopener noreferrer">
+              Dedan Kimathi University of Technology
+            </a> Main Entertainment Hub
+          </p>
+        </div>
       </div>
-      <h1 class="hero-title">
-        Empowering Campus Minds, <br>
-        <span class="hero-title-gradient">Connecting Every Student.</span>
-      </h1>
-      <p class="hero-subtitle">
-        Your unified gateway to Dedan Kimathi University of Technology. Read high-impact journalism in <em>The Post</em>, claim exclusive brand perks from verified partners like Oraimo, and explore campus innovation.
-      </p>
+    </header>
 
-      <div class="hero-actions">
-        <a href="/blog" class="btn-primary-hero">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-          Read The Post & News
-        </a>
-        <a href="/partnership/oraimo" class="btn-secondary-hero">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          Claim Oraimo Student Rewards (200 Pts + 5% Off)
-        </a>
+    <main>
+            
+      <section class="hero">
+        <div class="hero-left glass-card">
+          
+          <div class="social-icons">
+            <!-- Instagram -->
+            <div class="social-icon instagram" onclick="window.open('https://instagram.com/dekutconnect', '_blank')">
+              <i class="fab fa-instagram"></i>
+            </div>
+
+            <!-- TikTok -->
+            <div class="social-icon tiktok" onclick="window.open('https://www.tiktok.com/@dekutconnect.official', '_blank')">
+              <img src="https://media.link.me/cdn-cgi/image/width=160,height=160,quality=90,format=webp/images/style/icons/v5.0/TikTok-2.png" 
+                   alt="TikTok Icon" width="50" height="50" style="border-radius:10px;" />
+            </div>
+
+            <!-- Facebook -->
+            <div class="social-icon facebook" onclick="window.open('https://www.facebook.com/share/1BQzioTvPc/', '_blank')">
+              <i class="fab fa-facebook-f"></i>
+            </div>
+
+            <!-- Twitter / X -->
+            <div class="social-icon twitter" onclick="window.open('https://twitter.com/dekutconnect', '_blank')">
+              <img src="https://media.link.me/cdn-cgi/image/width=160,height=160,quality=90,format=webp/images/static/icons/v5.1/twitter-dark-2.png" 
+                   alt="Twitter Icon" width="50" height="50" style="border-radius:10px;" />
+            </div>
+
+            <!-- YouTube -->
+            <div class="social-icon youtube" onclick="window.open('https://youtube.com/@dekutconnect', '_blank')">
+              <i class="fab fa-youtube"></i>
+            </div>
+            
+            <!-- Telegram -->
+            <div class="social-icon telegram" onclick="window.open('https://t.me/DEKUTCONNECT', '_blank')">
+              <i class="fab fa-telegram"></i>
+            </div>
+
+            <!-- Threads -->
+            <div class="social-icon threads" onclick="window.open('https://threads.net/@dekutconnect', '_blank')">
+              <img src="https://media.link.me/cdn-cgi/image/width=160,height=160,quality=90,format=webp/images/style/icons/v5.0/Threads-2-dark.png" 
+                   alt="Threads Icon" width="50" height="50" style="border-radius:10px;" />
+            </div>
+          </div>
+
+          <!-- WhatsApp buttons row -->
+          <div class="whatsapp-row">
+            <div class="whatsapp-btn" id="whatsappGroupsBtn">
+              <img src="https://static.whatsapp.net/rsrc.php/yZ/r/JvsnINJ2CZv.svg" 
+                   alt="WhatsApp" class="whatsapp-icon" />
+              <span>Groups</span>
+            </div>
+            
+            <div class="whatsapp-btn" onclick="window.open('https://www.whatsapp.com/channel/0029VbAb8L46WaKx34k8vU0S', '_blank')">
+              <img src="https://static.whatsapp.net/rsrc.php/yZ/r/JvsnINJ2CZv.svg" 
+                   alt="WhatsApp" class="whatsapp-icon" />
+              <span> Channel</span>
+            </div>
+          </div>
+          
+          <div class="total-community" id="totalCommunityBtn">
+            <div class="total-count">
+              <div class="total-icon">👥</div>
+              <div class="total-text">
+                <div class="total-label">Total Community</div>
+                <div class="total-number" id="totalCount">32.6k</div>
+              </div>
+            </div>
+            <div class="dropdown-arrow">▼</div>
+          </div>
+          
+          <!-- Primary Navigation Action buttons row -->
+          <div class="action-buttons" style="display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0;">
+            <a href="/blog" class="btn cta" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700;">
+              <i class="fas fa-newspaper"></i> The Post & News
+            </a>
+            <a href="/partnership" class="btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background: rgba(132, 204, 22, 0.15); color: #84cc16; border: 1px solid rgba(132, 204, 22, 0.4); font-weight: 700;">
+              <i class="fas fa-handshake"></i> Brand Partnerships
+            </a>
+            <a href="/partnership/oraimo" class="btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background: rgba(132, 204, 22, 0.25); color: #a3e635; border: 1.5px solid #a3e635; font-weight: 800;">
+              🎁 Oraimo Perks (200 Pts + 5% Off)
+            </a>
+            <a href="/hostels.html" class="btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+              <i class="fas fa-bed"></i> Hostels
+            </a>
+            <a href="/delegates.html" class="btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+              <i class="fas fa-user-tie"></i> Delegates
+            </a>
+            <a href="/dekutapp_resource.html" class="btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+              <i class="fas fa-book"></i> Resources
+            </a>
+            <button class="btn" id="donateBtn">Support Us</button>
+            <button class="btn" id="shopBtn">Our Store</button>
+            <button class="btn" id="contactBtn">Contact Us</button>
+            <button class="btn cta" id="advertiseBtn">Advertise</button>
+          </div>
+
+          <!-- Featured Brand Partnership Card (Oraimo) -->
+          <div class="ad-card" style="background: linear-gradient(135deg, #132717 0%, #0f172a 100%); border: 1.5px solid #84cc16; margin: 20px 0; border-radius: var(--border-radius); padding: 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span style="background: #84cc16; color: #0b0f19; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+                Official Partner Perk
+              </span>
+              <span style="color: #a3e635; font-size: 0.8rem; font-weight: 700;">DEKUTCONNECT × Oraimo</span>
+            </div>
+            <h4 style="color: #ffffff; font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">
+              Get 200 Free Points + 5% OFF on Oraimo Kenya! 🎁
+            </h4>
+            <p class="s-desc" style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 12px; line-height: 1.5;">
+              We have partnered with Oraimo to gift our followers! Download the Oraimo Store App with referral code <strong style="color:#a3e635;">0tws6pdekutconnect</strong> for 200 points (Ksh 200), apply coupon <strong style="color:#a3e635;">98efkzq4</strong> for 5% off, and stand a chance to win free FreePods Neo True Wireless Earbuds as the 100th or 200th buyer!
+            </p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="/partnership/oraimo" class="btn cta" style="text-decoration:none; background:#84cc16; color:#0b0f19; font-weight:800; padding: 8px 16px;">Claim Oraimo Perks &rarr;</a>
+              <a href="/go/oraimo" target="_blank" rel="noopener" class="btn" style="text-decoration:none; padding: 8px 14px;">Shop Store (5% Off)</a>
+              <a href="/go/oraimo-app" target="_blank" rel="noopener" class="btn" style="text-decoration:none; padding: 8px 14px;">Download App (200 Pts)</a>
+            </div>
+          </div>
+
+          <ul class="services-list">
+            <li>Entertainment and campus discussions</li>
+            <li>Campus trends & student life ☕</li>
+            <li>Student perspectives from DeKUT community</li>
+            <li>Snapshot of campus culture</li>
+            <li>HELB & KUCCPS updates</li>
+            <li>Bursary information</li>
+          </ul>
+
+          <div class="ig-stats" data-username="dekutconnect">
+              <div class="ig-header">
+                  <div class="ig-logo"><i class="fab fa-instagram"></i></div>
+                  <h3 class="ig-title">Main Page</h3>
+              </div>
+              <div class="ig-content">
+                  <div class="ig-loading">
+                      <div class="ig-spinner"></div>
+                      <p>Loading...</p>
+                  </div>
+              </div>
+          </div>
+
+          <div class="ig-stats" data-username="dekut.connect">
+              <div class="ig-header">
+                  <div class="ig-logo"><i class="fab fa-instagram"></i></div>
+                  <h3 class="ig-title">Campus Funpage</h3>
+              </div>
+              <div class="ig-content">
+                  <div class="ig-loading">
+                      <div class="ig-spinner"></div>
+                      <p>Loading...</p>
+                  </div>
+              </div>
+          </div>
+
+          <div class="social-grid" id="socialGrid">
+            <!-- Social tiles injected by JS -->
+          </div>
+
+          <!-- Facebook Page Embed -->
+          <div id="fb-root"></div>
+
+          <div class="fb-page" 
+               data-href="https://www.facebook.com/profile.php?id=61581728754780"
+               data-tabs="timeline" 
+               data-width="400" 
+               data-height="100" 
+               data-small-header="false" 
+               data-adapt-container-width="true" 
+               data-hide-cover="false" 
+               data-show-facepile="true">
+            <blockquote cite="https://www.facebook.com/profile.php?id=61581728754780" 
+                        class="fb-xfbml-parse-ignore">
+              <a href="https://www.facebook.com/profile.php?id=61581728754780">
+                Facebook Page
+              </a>
+            </blockquote>
+          </div>
+
+          <!-- Google Map Embed -->
+          <div class="map-container">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.232581618022!2d36.94767307464713!3d-0.4167354353862714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285c1b5d0e3a3f%3A0x5e5f6b7c3e3e3e3e!2sDedan%20Kimathi%20University%20of%20Technology!5e0!3m2!1sen!2ske!4v1630000000000!5m2!1sen!2ske"
+              width="100%"
+              height="400"
+              style="border:0; border-radius: var(--border-radius);"
+              allowfullscreen=""
+              loading="lazy">
+            </iframe>
+          </div>
+
+          <div class="ad-card">
+            <h4>Advertise with DEKUTCONNECT</h4>
+            <p class="s-desc">Email us or fill the form to request a collaboration. Quick turnaround. Student-focused packages.</p>
+            <div class="rate-list">
+              <div class="rate"><strong>Story</strong><div>From KSh 100</div></div>
+              <div class="rate"><strong>Reel</strong><div>From KSh 700</div></div>
+              <div class="rate"><strong>Pinned Post</strong><div>From KSh 1200</div></div>
+              <div class="rate"><strong>WhatsApp Promotion</strong><div>From KSh 1500</div></div>
+              <div class="rate"><strong>Telegram</strong><div>From KSh 150</div></div>
+              <div class="rate"><strong>YouTube</strong><div>From KSh 2000</div></div>
+              <div class="rate"><strong>TikTok Promotion</strong><div>From KSh 1800</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="youtube-section">
+        <h2>Latest YouTube Uploads</h2>
+        <div id="youtube-feed"></div>
+        <button id="showMoreBtn">Show More</button>
       </div>
-    </section>
 
-    <!-- Core Pillars Grid -->
-    <section class="portal-pillars">
+      <!-- Popup Modal -->
+      <div id="videoModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <iframe id="videoPlayer" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <section class="faq-section">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-container">
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>What is DEKUTCONNECT?</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+              <p>DEKUTCONNECT is an independent student-run community platform for Dedan Kimathi University of Technology students, focused on campus entertainment, news, editorial stories, brand partnerships, and student discussions.</p>
+            </div>
+          </div>
+          
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>How can I support DEKUTCONNECT?</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+              <p> You can support us by:<ul class="services-list">
+                <li>Making a donation to help with platform costs</li>
+                <li>Purchasing from our merchandise store</li>
+                <li>Sharing campus news and content with us</li>
+                <li>Advertising your business or services</li>
+                <li>Following and sharing our social media content</li>
+                <li>Engaging with our posts and community</li>
+              </ul> and any other ways that provide value to our community. Welcome to our community!</p>
+            </div>
+          </div>
+          
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>How do I advertise with DEKUTCONNECT?</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+              <p>Click the "Advertise" button to fill out our quick form. Our team will get back to you within 48 hours with student-focused advertising packages tailored to your needs.</p>
+            </div>
+          </div>
+          
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>How can I contact DEKUTCONNECT?</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+              <p>You can contact us directly via email, WhatsApp, or Instagram DM. We also offer anonymous contact options for those who prefer privacy while sharing campus information.</p>
+            </div>
+          </div>
+          
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>What kind of content do you share?</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+              <p> We provide:<ul class="services-list">
+                <li>Campus entertainment and discussions</li>
+                <li>Student trends & campus life</li>
+                <li>Perspectives from DeKUT community</li>
+                <li>Snapshot of campus culture</li>
+                <li>HELB & KUCCPS updates</li>
+                <li>Bursary information</li>
+              </ul> and other content relevant to DeKUT students.</p>
+            </div>
+          </div>
+          
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>Is DEKUTCONNECT officially affiliated with the university?</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+              <p>No, DEKUTCONNECT is an independent student-run platform and is not officially affiliated with Dedan Kimathi University of Technology. We operate as a community initiative by and for students.</p>
+            </div>
+          </div>
+        </div>
+      </section>
       
-      <!-- Pillar 1: Blog & News -->
-      <div class="pillar-card">
-        <div class="pillar-icon-wrap">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
-        </div>
-        <h3 class="pillar-title">The Post & Editorial</h3>
-        <p class="pillar-desc">
-          The independent digital journal and gazette of DeKUT. Stay informed with breaking campus updates, legal tech insights, student lifestyles, and technology analysis.
-        </p>
-        <a href="/blog" class="pillar-link">
-          Explore Newsroom &rarr;
-        </a>
+      <!-- Legal Links -->
+      <div class="legal-links">
+        <a href="#" id="privacyPolicyBtn">Privacy Policy</a>
+        <a href="#" id="termsOfServiceBtn">Terms of Service</a>
+        <a href="#" id="communityGuidelinesBtn">Community Guidelines</a>
+        <a href="#" id="disclaimerBtn">Disclaimer</a>
+      </div>
+      <!-- Official Disclaimer -->
+      <div class="official-disclaimer">
+        <strong>Note:</strong> DEKUTCONNECT is an <strong>independent student-run platform</strong> and is not officially affiliated with Dedan Kimathi University of Technology.
+      </div>
+      <!-- Financial Transparency Note -->
+      <div class="financial-transparency">
+        <h4>Financial Transparency</h4>
+        <p>All donations and advertising revenue support platform maintenance, content creation, and community events. We maintain transparent records of all transactions.</p>
       </div>
 
-      <!-- Pillar 2: Brand Partnerships (Featured) -->
-      <div class="pillar-card featured">
-        <div class="pillar-badge-top">Exclusive Perks</div>
-        <div class="pillar-icon-wrap" style="color: #a3e635; background: rgba(132, 204, 22, 0.15);">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+      <footer>
+        <div class="footer-brand">
+          <strong>DEKUTCONNECT</strong>
+          <div>© DEKUTCONNECT — Independent Student Community Platform</div>
         </div>
-        <h3 class="pillar-title">Brand Partnerships</h3>
-        <p class="pillar-desc">
-          Official collaborations with top tech and lifestyle brands. Get student discounts, free points, and tech giveaways starting with our official <strong>Oraimo Kenya</strong> partner offer.
-        </p>
-        <a href="/partnership" class="pillar-link" style="color: #a3e635;">
-          View Brand Partnerships &rarr;
-        </a>
+        <div class="footer-actions">
+          <a class="btn" href="mailto:dekutconnect@gmail.com">dekutconnect@gmail.com</a>
+          <a class="btn" href="#" id="shareBtn">Share</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Bottom Sheets -->
+  <div class="sheet-overlay" id="sheetOverlay"></div>
+  
+  <div class="bottom-sheet" id="donateSheet">
+    <div class="sheet-header">
+      <h3>Support DEKUTCONNECT</h3>
+      <button class="sheet-close" data-sheet="donateSheet">×</button>
+    </div>
+    <div class="transparency-note">
+      <p><strong>Transparency Note:</strong> All donations support platform maintenance, content creation, and community events. We maintain records of all financial transactions.</p>
+    </div>
+    <p>Your contribution helps us maintain this independent student platform!</p>
+    <div class="sheet-action">
+      <button class="btn cta" onclick="window.open('https://eduniapps.com/donate.html', '_blank')">Donate Now</button>
+    </div>
+  </div>
+
+  <div class="bottom-sheet" id="shopSheet">
+    <div class="sheet-header">
+      <h3>DEKUTCONNECT Store</h3>
+      <button class="sheet-close" data-sheet="shopSheet">×</button>
+    </div>
+    <p>Support our community by purchasing merchandise</p>
+    <div class="sheet-action">
+      <button class="btn cta" onclick="window.open('https://tinyurl.com/Ask-DEKUTCONNECT-For-Help', '_blank')">Visit Store</button>
+    </div>
+  </div>
+
+  <div class="bottom-sheet" id="totalCommunitySheet">
+    <div class="sheet-header">
+      <h3>Community Reach</h3>
+      <button class="sheet-close" data-sheet="totalCommunitySheet">×</button>
+    </div>
+    <p>Our presence across social platforms</p>
+    <div class="social-stats">
+      <div class="social-stat">
+        <div class="social-stat-icon whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </div>
+        <div class="social-stat-name">WhatsApp channel</div>
+        <div class="social-stat-count" id="whatsappStatCount">--</div>
       </div>
-
-      <!-- Pillar 3: Student Studio -->
-      <div class="pillar-card">
-        <div class="pillar-icon-wrap" style="color: #60a5fa; background: rgba(59, 130, 246, 0.15);">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+      <div class="social-stat">
+        <div class="social-stat-icon telegram">
+          <i class="fab fa-telegram"></i>
         </div>
-        <h3 class="pillar-title">Campus Innovation</h3>
-        <p class="pillar-desc">
-          Celebrating Dedan Kimathi University’s world-renowned engineering breakthroughs, computer science achievements, robotics developments, and student startups.
-        </p>
-        <a href="/blog?category=Innovation" class="pillar-link" style="color: #60a5fa;">
-          Explore Innovations &rarr;
-        </a>
+        <div class="social-stat-name">Telegram</div>
+        <div class="social-stat-count" id="telegramStatCount">--</div>
       </div>
-
-    </section>
-
-    <!-- Oraimo Featured Highlight Banner -->
-    <section style="background: linear-gradient(135deg, #132717 0%, #0f172a 100%); border: 1.5px solid rgba(132, 204, 22, 0.4); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 4rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
-        <div style="padding: 2.5rem;">
-          <span style="background: #a3e635; color: #0b0f19; font-weight: 800; font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 9999px; text-transform: uppercase;">
-            Official Partner Offer
-          </span>
-          <h2 style="font-size: 2rem; font-weight: 900; color: #fff; margin: 1rem 0 0.75rem;">
-            DEKUTCONNECT × Oraimo Rewards
-          </h2>
-          <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.6; margin-bottom: 1.5rem;">
-            Get <strong>200 Points (Ksh 200)</strong> on the Oraimo App with code <code style="color: #a3e635; font-weight: bold;">0tws6pdekutconnect</code>, plus <strong>5% OFF</strong> any order with coupon <code style="color: #a3e635; font-weight: bold;">98efkzq4</code>, and stand a chance to win <strong>Free FreePods Neo Earbuds</strong>!
-          </p>
-          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <a href="/partnership/oraimo" class="btn-primary-hero" style="background: #a3e635; color: #0b0f19; font-weight: 800; padding: 0.75rem 1.5rem; font-size: 0.95rem;">
-              Claim Oraimo Perks &rarr;
-            </a>
-            <a href="/go/oraimo" target="_blank" rel="noopener" class="btn-secondary-hero" style="padding: 0.75rem 1.3rem; font-size: 0.95rem;">
-              Shop Oraimo Store
-            </a>
-          </div>
+      <div class="social-stat">
+        <div class="social-stat-icon instagram">
+          <i class="fab fa-instagram"></i>
         </div>
-
-        <div style="height: 100%; display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
-          <img src="/images/oraimo-banner.png" alt="Oraimo Smart Accessories Banner" style="border-radius: var(--radius-md); max-height: 280px; width: 100%; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.1);">
-        </div>
+        <div class="social-stat-name">Instagram</div>
+        <div class="social-stat-count" id="instagramStatCount">--</div>
       </div>
-    </section>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="portal-footer">
-    <div class="portal-container">
-      <div class="portal-footer-grid">
-        <div class="portal-footer-col">
-          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
-            <img src="https://i.postimg.cc/TY5RBJKk/560442384-17856268296536413-2485079652577777705-n-jpg-stp-dst-jpg-s150x150-tt6-efg-ey-J2ZW5jb2Rl-X3R.jpg" alt="DEKUTCONNECT" style="width: 28px; height: 28px; border-radius: 50%;">
-            <strong style="color: #fff; font-size: 1.1rem;">DEKUTCONNECT</strong>
-          </div>
-          <p style="font-size: 0.9rem; line-height: 1.5; color: #94a3b8; max-width: 380px;">
-            The central digital hub for Dedan Kimathi University of Technology students, bridging campus news, editorial journalism, verified brand partnerships, and tech innovation.
-          </p>
+      <div class="social-stat">
+        <div class="social-stat-icon tiktok">
+          <i class="fab fa-tiktok"></i>
         </div>
-
-        <div class="portal-footer-col">
-          <h4>Ecosystem</h4>
-          <ul>
-            <li><a href="/">Home Portal</a></li>
-            <li><a href="/blog">The Post & Blog</a></li>
-            <li><a href="/partnership">Brand Partnerships</a></li>
-            <li><a href="/partnership/oraimo">Oraimo Offer</a></li>
-          </ul>
-        </div>
-
-        <div class="portal-footer-col">
-          <h4>Campus Links</h4>
-          <ul>
-            <li><a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener">DeKUT Main Website</a></li>
-            <li><a href="/go/oraimo" target="_blank" rel="noopener">Oraimo Store (5% Off)</a></li>
-            <li><a href="/dmca.html">Legal & Compliance</a></li>
-          </ul>
-        </div>
+        <div class="social-stat-count" id="tiktokStatCount">--</div>
+        <div class="social-stat-name">Tiktok</div>
       </div>
-
-      <div class="portal-footer-bottom">
-        <span>&copy; 2026 DEKUTCONNECT. Official University Partner Network.</span>
-        <span>Dedicated to <a href="https://www.dkut.ac.ke/" target="_blank" rel="noopener" style="color: #34d399; text-decoration: underline;">Dedan Kimathi University of Technology</a></span>
+      <div class="social-stat">
+        <div class="social-stat-icon youtube">
+          <i class="fab fa-youtube"></i>
+        </div>
+        <div class="social-stat-name">Youtube</div>
+        <div class="social-stat-count" id="youtubeStatCount">--</div>
       </div>
     </div>
-  </footer>
+  </div>
 
+  <!-- Contact Modal -->
+  <div class="modal" id="contactModal">
+    <div class="modal-content">
+      <button class="modal-close" data-modal="contactModal">×</button>
+      <h2>Contact DEKUTCONNECT</h2>
+      <p>Choose how you'd like to reach us</p>
+      
+      <div class="contact-options">
+        <div class="contact-category">
+          <h4><i class="fas fa-user-secret"></i> Anonymous Contact</h4>
+          <p class="contact-note">For those who prefer to share information privately</p>
+          <div class="contact-actions">
+            <button class="contact-btn ngl" onclick="window.open('https://ngl.link/dkutconnect', '_blank')">NGL Link</button>
+            <button class="contact-btn weet" onclick="window.open('https://twet.link/dekutconnect', '_blank')">Twet.link</button>
+          </div>
+        </div>
+        
+        <div class="contact-category">
+          <h4><i class="fas fa-user"></i> Direct Contact</h4>
+          <p class="contact-note">For direct communication with our team</p>
+          <div class="contact-actions">
+            <button class="contact-btn email" onclick="window.open('mailto:dekutconnect@gmail.com', '_blank')">Email</button>
+            <button class="contact-btn whatsapp" onclick="window.open('https://wa.me/254769486775', '_blank')">WhatsApp</button>
+            <button class="contact-btn instagram" onclick="window.open('https://www.instagram.com/@dekutconnect', '_blank')">Instagram</button>
+          </div>
+        </div>
+      </div>
+      
+      <p class="modal-footer">
+        We respond to all messages within 24 hours
+      </p>
+    </div>
+  </div>
+
+  <!-- Advertise modal -->
+  <div id="advModal" class="modal">
+    <div class="modal-content">
+      <h3>Advertise with DEKUTCONNECT</h3>
+      <p>Complete this quick form and our team will get back to you within 48 hours.</p>
+      <form id="advForm">
+        <div class="form-row">
+          <input placeholder="Brand / Business" name="brand" required />
+          <input placeholder="Contact email" name="email" type="email" required />
+        </div>
+        <textarea placeholder="Message / Brief" name="brief" required></textarea>
+        <div class="form-actions">
+          <button type="button" class="btn" id="advClose">Cancel</button>
+          <button type="submit" class="btn cta">Send Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- WhatsApp Groups Modal -->
+  <div class="modal" id="waGroupsModal">
+    <div class="modal-content">
+      <button class="modal-close" data-modal="waGroupsModal">×</button>
+      <h2>Join Our WhatsApp Groups! 🎉</h2>
+      <p>Connect with fellow DeKUT students in our active communities</p>
+      
+      <ul class="group-list">
+        <li class="group-item">
+          <a href="https://chat.whatsapp.com/EIdzppKmdiZ1KZbC7DKUAe" target="_blank" class="group-link">
+            Official Group 1 👥
+          </a>
+        </li>
+        <li class="group-item">
+          <a href="https://chat.whatsapp.com/DBnDLIYdPfGBLmvJuuVMSz" target="_blank" class="group-link">
+            Official Group 2 🔥
+          </a>
+        </li>
+        <li class="group-item">
+          <a href="https://chat.whatsapp.com/KqVMAYzgQSXAKF4kNuKfWR" target="_blank" class="group-link">
+            Open Group 3 💬
+          </a>
+        </li>
+        <li class="group-item">
+          <a href="https://chat.whatsapp.com/DYGFPMmdNYzFYvk6uZ1Ge1" target="_blank" class="group-link">
+            Student Connections Group
+          </a>
+        </li>
+      </ul>
+      
+      <p class="modal-footer">
+        Tap any group to join the conversation!
+      </p>
+    </div>
+  </div>
+  
+  <!-- Legal Documents Modals -->
+  <div class="modal" id="privacyPolicyModal">
+    <div class="modal-content">
+      <button class="modal-close" data-modal="privacyPolicyModal">×</button>
+      <h2>Privacy Policy</h2>
+      <div class="legal-content">
+        <p><strong>Last Updated:</strong> 3rd October 2025</p>
+        
+        <h3>Information We Collect</h3>
+        <p>We collect information you provide directly to us, such as when you contact us, submit content, or interact with our services.</p>
+        
+        <h3>How We Use Your Information</h3>
+        <p>We use the information we collect to:</p>
+        <ul>
+          <li>Provide, maintain, and improve our services</li>
+          <li>Respond to your comments and questions</li>
+          <li>Send you technical notices and support messages</li>
+          <li>Communicate with you about products, services, and events</li>
+        </ul>
+        
+        <h3>Sharing of Information</h3>
+        <p>We do not sell, trade, or otherwise transfer your personally identifiable information to outside parties without your consent.</p>
+        
+        <h3>Contact Us</h3>
+        <p>If you have any questions about this Privacy Policy, please contact us at dekutconnect@gmail.com</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="termsOfServiceModal">
+    <div class="modal-content">
+      <button class="modal-close" data-modal="termsOfServiceModal">×</button>
+      <h2>Terms of Service</h2>
+      <div class="legal-content">
+        <p><strong>Last Updated:</strong> 3rd October 2025</p>
+        
+        <h3>Acceptance of Terms</h3>
+        <p>By accessing and using DEKUTCONNECT, you accept and agree to be bound by the terms and provision of this agreement.</p>
+        
+        <h3>Use License</h3>
+        <p>Permission is granted to temporarily use DEKUTCONNECT for personal, non-commercial transitory viewing only.</p>
+        
+        <h3>User Conduct</h3>
+        <p>You agree not to use the service to:</p>
+        <ul>
+          <li>Submit false or misleading information</li>
+          <li>Upload any content that is unlawful, harmful, or offensive</li>
+          <li>Impersonate any person or entity</li>
+          <li>Interfere with or disrupt the service</li>
+        </ul>
+        
+        <h3>Termination</h3>
+        <p>We may terminate or suspend access to our service immediately, without prior notice, for any breach of these Terms.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="communityGuidelinesModal">
+    <div class="modal-content">
+      <button class="modal-close" data-modal="communityGuidelinesModal">×</button>
+      <h2>Community Guidelines</h2>
+      <div class="legal-content">
+        <p><strong>Last Updated:</strong> 3rd October 2025</p>
+        
+        <h3>Our Community Values</h3>
+        <p>DEKUTCONNECT is committed to maintaining a respectful and inclusive community for all Dedan Kimathi University students.</p>
+        
+        <h3>Expected Behavior</h3>
+        <ul>
+          <li>Be respectful and considerate of others</li>
+          <li>Engage in constructive discussions</li>
+          <li>Share accurate information</li>
+          <li>Respect different opinions and perspectives</li>
+        </ul>
+        
+        <h3>Prohibited Content</h3>
+        <ul>
+          <li>Hate speech or discriminatory language</li>
+          <li>Harassment or bullying</li>
+          <li>False information or misinformation</li>
+          <li>Spam or excessive self-promotion</li>
+          <li>Content that violates university policies</li>
+        </ul>
+        
+        <h3>Reporting Issues</h3>
+        <p>If you encounter content that violates these guidelines, please contact us immediately at dekutconnect@gmail.com</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="disclaimerModal">
+    <div class="modal-content">
+      <button class="modal-close" data-modal="disclaimerModal">×</button>
+      <h2>Disclaimer</h2>
+      <div class="legal-content">
+       <div class="disclaimer-content">
+        <p>The content shared on DEKUTCONNECT is sourced from publicly accessible platforms and third-party submissions. It is made available strictly for general informational purposes and does not constitute advice, endorsement, or representation by us.</p>
+        
+        <p>To the maximum extent permitted by law, we disclaim all liability for any loss, damage, or consequences arising from the use, misuse, or reliance on the information shared.</p>
+        
+        <p>If you believe any material on this platform infringes your rights or violates applicable laws, please contact the administrator for immediate review. All content is published in good faith and for informational or creative purposes.</p>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <script async defer crossorigin="anonymous" 
+    src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0">
+  </script>
+  <script src="/script-min.js"></script>
+  <!-- Instagram Embed -->
+  <script async src="https://www.instagram.com/embed.js"></script>
+
+  <!-- Facebook SDK -->
+  <script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0" crossorigin="anonymous"></script>
+
+  <!-- Legitimacy improvements -->
+  <script src="/script2-min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const snippets = document.querySelectorAll('.ig-stats');
+    const config = {
+        apiUrls: [
+            'https://ig-analytics-vercel.vercel.app/api/profile?username=',
+            'https://instascrapper-mocha.vercel.app/api/profile?username='
+        ]
+    };
+
+    async function fetchProfileData(username) {
+        for (const apiUrl of config.apiUrls) {
+            try {
+                const response = await fetch(`${apiUrl}${username}`);
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (error) {
+                console.error(`Error fetching from ${apiUrl}:`, error);
+            }
+        }
+        throw new Error('Failed to fetch data from all endpoints');
+    }
+
+    snippets.forEach(snippet => {
+        const username = snippet.dataset.username;
+        if (username) {
+            fetchProfileData(username)
+                .then(data => {
+                    const content = snippet.querySelector('.ig-content');
+                    const loading = content.querySelector('.ig-loading');
+                    const profile = data.profile;
+                    
+                    const statsHTML = `
+                        <div class="ig-username">
+                            @${profile.username}
+                            ${profile.is_verified ? '<span class="ig-verified"><i class="fas fa-check-circle"></i></span>' : ''}
+                        </div>
+                        <div class="ig-grid">
+                            <div class="ig-stat">
+                                <div class="ig-value">${formatNumber(profile.posts_count)}</div>
+                                <div class="ig-label">Posts</div>
+                            </div>
+                            <div class="ig-stat">
+                                <div class="ig-value">${formatNumber(profile.followers)}</div>
+                                <div class="ig-label">Followers</div>
+                            </div>
+                            <div class="ig-stat">
+                                <div class="ig-value">${formatNumber(profile.following)}</div>
+                                <div class="ig-label">Following</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    loading.style.display = 'none';
+                    content.innerHTML = statsHTML;
+                    
+                    snippet.addEventListener('click', function() {
+                        window.open(`https://instagram.com/${profile.username}`, '_blank');
+                    });
+                })
+                .catch(error => {
+                    const content = snippet.querySelector('.ig-content');
+                    const loading = content.querySelector('.ig-loading');
+                    loading.style.display = 'none';
+                    content.innerHTML = '<div class="ig-error"><p>Follow on Instagram</p></div>';
+                    
+                    snippet.addEventListener('click', function() {
+                        window.open(`https://instagram.com/${username}`, '_blank');
+                    });
+                });
+        }
+    });
+    
+    function formatNumber(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
+  });
+  </script>
 </body>
 </html>
