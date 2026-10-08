@@ -34,9 +34,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
   <!-- 100% Self-Hosted Stylesheets (Zero Google Fonts CDN Calls) -->
-  <link rel="stylesheet" href="/blog/css/style.css?v=1789909159">
-  <link rel="stylesheet" href="/blog/css/uiverse-social.css?v=1789909159">
-  <link rel="stylesheet" href="/blog/css/uiverse-loader.css?v=1789909159">
+  <link rel="stylesheet" href="/blog/css/style.css?v=1791445139">
+  <link rel="stylesheet" href="/blog/css/uiverse-social.css?v=1791445139">
+  <link rel="stylesheet" href="/blog/css/uiverse-loader.css?v=1791445139">
 </head>
 <body>
   <!-- Top Navigation & Edition Header -->
@@ -86,22 +86,27 @@
 
   <!-- Category Navigation Bar -->
   <nav class="main-nav">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-      <ul class="nav-links">
+    <div class="container main-nav-inner">
+      <ul class="nav-links" id="category-nav-links">
         <li><a href="#" class="active" data-category="All">All Stories</a></li>
         <li><a href="#" data-category="Campus & Tech">Campus & Tech</a></li>
         <li><a href="#" data-category="Tech & Law">Tech & Law</a></li>
         <li><a href="#" data-category="Life & Culture">Life & Culture</a></li>
         <li><a href="#" data-category="Innovation">Innovation</a></li>
       </ul>
-      <div style="min-width: 220px;">
-        <input 
-          id="search-posts-input" 
-          type="text" 
-          placeholder="Search articles..." 
-          data-mask="true"
-          style="width: 100%; padding: 0.4rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 20px; font-size: 0.825rem; outline: none;"
-        />
+      <div class="nav-search-wrap">
+        <div class="search-input-inner">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            id="search-posts-input" 
+            type="text" 
+            placeholder="Search articles..." 
+            data-mask="true"
+          />
+        </div>
       </div>
     </div>
   </nav>
@@ -327,10 +332,10 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="/blog/js/cache-manager.js?v=1789909159"></script>
-  <script src="/blog/js/firebase-config.js?v=1789909159"></script>
-  <script src="/blog/js/legal-compliance.js?v=1789909159"></script>
-  <script src="/blog/js/instagram-embed.js?v=1789909159"></script>
-  <script src="/blog/js/blog-engine.js?v=1789909159"></script>
+  <script src="/blog/js/cache-manager.js?v=1791445139"></script>
+  <script src="/blog/js/firebase-config.js?v=1791445139"></script>
+  <script src="/blog/js/legal-compliance.js?v=1791445139"></script>
+  <script src="/blog/js/instagram-embed.js?v=1791445139"></script>
+  <script src="/blog/js/blog-engine.js?v=1791445139"></script>
 </body>
 </html>

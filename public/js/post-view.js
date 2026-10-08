@@ -24,6 +24,29 @@ function resolveMediaUrl(url) {
 }
 
 async function initPostView() {
+  // 0. Intercept Partnership & Affiliate shortlink routes (in case hit via 404 fallback on static host)
+  const rawPath = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+  if (rawPath === '/go/oraimo' || rawPath === '/oraimo/shop' || rawPath === '/partnership/oraimo/shop') {
+    window.location.replace('https://ke.oraimo.com?affiliate_code=5g0mo32v');
+    return;
+  }
+  if (rawPath === '/go/oraimo-app' || rawPath === '/oraimo/app' || rawPath === '/partnership/oraimo/app' || rawPath === '/go/oraimo/app') {
+    window.location.replace('https://ke.oraimo.com/download-app.html?utm_source=oraimo&utm_medium=invite&invite_code=0tws6pdekutconnect&deeplink=%7B%22target_type%22%3A17%2C%22keyword%22%3A%220tws6pdekutconnect%22%7D');
+    return;
+  }
+  if (rawPath === '/oraimo') {
+    window.location.replace('/partnership/oraimo');
+    return;
+  }
+  if (rawPath === '/partnership') {
+    window.location.replace('/partnership/index.html');
+    return;
+  }
+  if (rawPath === '/partnership/oraimo') {
+    window.location.replace('/partnership/oraimo/index.html');
+    return;
+  }
+
   const loaderOverlay = document.getElementById('loader-overlay');
   if (loaderOverlay && !window.__INITIAL_POST__) {
     loaderOverlay.classList.remove('hidden');

@@ -173,18 +173,45 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static assets from /public (Supports both / and /blog subpath)
-app.use(express.static(PUBLIC_DIR, { index: false }));
-app.use('/blog', express.static(PUBLIC_DIR, { index: false }));
-
 // -------------------------------------------------------------
+// AFFILIATE SHORTLINKS & REDIRECTS (Domain Branded Redirection)
+// -------------------------------------------------------------
+// Oraimo Store Affiliate Shortlink -> ke.oraimo.com
+app.get(['/go/oraimo', '/oraimo/shop', '/partnership/oraimo/shop'], (req, res) => {
+  res.redirect(302, 'https://ke.oraimo.com?affiliate_code=5g0mo32v');
+});
+
+// Oraimo App Download Shortlink with Referral Code -> ke.oraimo.com app download
+app.get(['/go/oraimo-app', '/oraimo/app', '/partnership/oraimo/app'], (req, res) => {
+  res.redirect(302, 'https://ke.oraimo.com/download-app.html?utm_source=oraimo&utm_medium=invite&invite_code=0tws6pdekutconnect&deeplink=%7B%22target_type%22%3A17%2C%22keyword%22%3A%220tws6pdekutconnect%22%7D');
+});
+
+// Short URL /oraimo -> Partnership Offer Page
+app.get(['/oraimo', '/oraimo/'], (req, res) => {
+  res.redirect(301, '/partnership/oraimo');
+});
 
 // -------------------------------------------------------------
 // PAGE ROUTES (Must be defined BEFORE /blog/:slug to avoid route collision)
 // -------------------------------------------------------------
-// Blog Home
-app.get(['/', '/blog', '/blog/'], (req, res) => {
+// Main DEKUTCONNECT Portal Homepage
+app.get('/', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'home.html'));
+});
+
+// The Post & Newsroom (Editorial Blog)
+app.get(['/blog', '/blog/'], (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+});
+
+// Brand Partnerships Directory
+app.get(['/partnership', '/partnership/'], (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'partnership', 'index.html'));
+});
+
+// Dedicated Oraimo Offer & Perks Page
+app.get(['/partnership/oraimo', '/partnership/oraimo/'], (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'partnership', 'oraimo', 'index.html'));
 });
 
 // Author Studio / Editor (Supports /editor, /editor.html, /blog/editor, /blog/editor.html)
@@ -201,6 +228,10 @@ app.get(['/dmca', '/dmca.html', '/blog/dmca', '/blog/dmca.html'], (req, res) => 
 app.get(['/legal-audit', '/legal-audit.html', '/blog/legal-audit'], (req, res) => {
   res.redirect(301, '/blog');
 });
+
+// Serve static assets from /public (Supports both / and /blog subpath)
+app.use(express.static(PUBLIC_DIR, { index: false, redirect: false }));
+app.use('/blog', express.static(PUBLIC_DIR, { index: false, redirect: false }));
 
 // -------------------------------------------------------------
 // CLOUDFLARE R2 MEDIA UPLOAD & PROXY ENDPOINTS
@@ -956,7 +987,10 @@ app.get('/sitemap.xml', (req, res) => {
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
   xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-  xml += `  <url>\n    <loc>${baseUrl}/blog</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${baseUrl}</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${baseUrl}/blog</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${baseUrl}/partnership</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+  xml += `  <url>\n    <loc>${baseUrl}/partnership/oraimo</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
   xml += `  <url>\n    <loc>${baseUrl}/dmca.html</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
 
   postsCache.forEach(p => {

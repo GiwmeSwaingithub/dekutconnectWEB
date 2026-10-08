@@ -2,13 +2,12 @@ import os
 import json
 import shutil
 import re
+import time
 
 REPO_DIR = r'c:\Users\Hacker\Documents\antigravity\amazing-maxwell'
 PUBLIC_DIR = os.path.join(REPO_DIR, 'public')
 POSTS_FILE = os.path.join(REPO_DIR, 'posts.json')
 BLOG_DIR = os.path.join(REPO_DIR, 'blog')
-
-import time
 
 BUILD_VERSION = int(time.time())
 
@@ -16,22 +15,16 @@ def fix_html_asset_paths(html_content):
     """
     Ensure all stylesheet link tags and script tags use /blog/ relative or base /blog/ paths with cache-busting version query parameters.
     """
-    # Fix absolute root CSS paths -> /blog/css/
     html_content = re.sub(r'href="/css/', 'href="/blog/css/', html_content)
-    # Fix absolute root JS paths -> /blog/js/
     html_content = re.sub(r'src="/js/', 'src="/blog/js/', html_content)
-    # Fix absolute root images -> /blog/images/
     html_content = re.sub(r'src="/images/', 'src="/blog/images/', html_content)
     html_content = re.sub(r'href="/images/', 'href="/blog/images/', html_content)
-    # Fix absolute root assets -> /blog/assets/
     html_content = re.sub(r'src="/assets/', 'src="/blog/assets/', html_content)
     html_content = re.sub(r'href="/assets/', 'href="/blog/assets/', html_content)
 
-    # Append cache-busting version parameter to all script and style tags
     html_content = re.sub(r'src="(/blog/js/[^"?]+)(\?v=\d+)?"', f'src="\\1?v={BUILD_VERSION}"', html_content)
     html_content = re.sub(r'href="(/blog/css/[^"?]+)(\?v=\d+)?"', f'href="\\1?v={BUILD_VERSION}"', html_content)
 
-    # Fix navigation links to stay within /blog/
     html_content = re.sub(r'href="/editor\.html"', 'href="/blog/editor.html"', html_content)
     html_content = re.sub(r'href="/editor"', 'href="/blog/editor.html"', html_content)
     html_content = re.sub(r'href="/dmca\.html"', 'href="/blog/dmca.html"', html_content)
@@ -42,9 +35,8 @@ def fix_html_asset_paths(html_content):
     return html_content
 
 def build():
-    print("=== Building GitHub Pages & Vercel Static Bundle (Firestore Engine) ===")
+    print("=== Building GitHub Pages & Static Bundles ===")
     
-    # Ensure blog directory exists
     os.makedirs(BLOG_DIR, exist_ok=True)
 
     # Clean up old post HTML files and post folders in blog/
@@ -55,28 +47,47 @@ def build():
         if os.path.isfile(item_path):
             if item.endswith('.html') and item not in core_files:
                 os.remove(item_path)
-                print(f"Cleaned up legacy post file: blog/{item}")
         elif os.path.isdir(item_path):
             if item not in core_dirs:
                 shutil.rmtree(item_path)
-                print(f"Cleaned up legacy post directory: blog/{item}")
     
-    # Copy public folders (css, js, fonts, images, assets) to blog/
+    # Copy public folders (css, js, fonts, images, assets) to root and blog/
     for sub in ['css', 'js', 'fonts', 'images', 'assets']:
         src_path = os.path.join(PUBLIC_DIR, sub)
-        dst_path = os.path.join(BLOG_DIR, sub)
+        dst_blog_path = os.path.join(BLOG_DIR, sub)
+        dst_root_path = os.path.join(REPO_DIR, sub)
         if os.path.exists(src_path):
-            if os.path.exists(dst_path):
-                shutil.rmtree(dst_path)
-            shutil.copytree(src_path, dst_path)
-            print(f"Copied {sub} -> blog/{sub}")
+            if os.path.exists(dst_blog_path):
+                shutil.rmtree(dst_blog_path)
+            shutil.copytree(src_path, dst_blog_path)
 
-    # Copy posts.json into blog/posts.json
+            if os.path.exists(dst_root_path):
+                shutil.rmtree(dst_root_path)
+            shutil.copytree(src_path, dst_root_path)
+            print(f"Copied {sub} -> blog/{sub} & {sub}")
+
+    # Copy partnership, go, and oraimo folders to root
+    for folder in ['partnership', 'go', 'oraimo']:
+        src_folder = os.path.join(PUBLIC_DIR, folder)
+        dst_folder = os.path.join(REPO_DIR, folder)
+        if os.path.exists(src_folder):
+            if os.path.exists(dst_folder):
+                shutil.rmtree(dst_folder)
+            shutil.copytree(src_folder, dst_folder)
+            print(f"Copied {folder} -> {folder}/")
+
+    # Copy posts.json
     shutil.copy(POSTS_FILE, os.path.join(BLOG_DIR, 'posts.json'))
     shutil.copy(POSTS_FILE, os.path.join(PUBLIC_DIR, 'posts.json'))
     print("Copied posts.json -> blog/posts.json")
 
-    # Process and write core HTML templates
+    # Root index.html should be the main portal homepage (connect.dekut.site)
+    home_html_file = os.path.join(PUBLIC_DIR, 'home.html')
+    if os.path.exists(home_html_file):
+        shutil.copy(home_html_file, os.path.join(REPO_DIR, 'index.html'))
+        print("Copied home.html -> index.html (Root Portal)")
+
+    # Process and write blog HTML templates (into blog/)
     html_files = ['index.html', 'editor.html', 'dmca.html', 'legal-audit.html', 'post.html', 'manifest.json']
     for hf in html_files:
         src_file = os.path.join(PUBLIC_DIR, hf)
@@ -89,7 +100,7 @@ def build():
                 f.write(fixed_content)
             print(f"Processed {hf} -> blog/{hf}")
 
-    # Generate smart 404.html SPA renderer (serves post.html directly while preserving clean URL without .html)
+    # Generate smart 404.html SPA renderer
     post_html_file = os.path.join(PUBLIC_DIR, 'post.html')
     if os.path.exists(post_html_file):
         with open(post_html_file, 'r', encoding='utf-8') as f:
@@ -102,8 +113,8 @@ def build():
         f.write(smart_404_content)
     with open(os.path.join(BLOG_DIR, '404.html'), 'w', encoding='utf-8') as f:
         f.write(smart_404_content)
-    print("Created 404.html SPA fallback pages (clean URLs without .html).")
-    print("=== Build Complete: All post metadata managed live via Firebase Firestore ===")
+    print("Created 404.html SPA fallback pages.")
+    print("=== Build Complete ===")
 
 if __name__ == '__main__':
     build()
